@@ -1,0 +1,443 @@
+/*
+ * Folha A4 do orçamento — tamanho físico fixo (210mm x 297mm), layout interno
+ * não responsivo. Em telas pequenas, o componente inteiro é escalado por
+ * A4ScaledPreview.tsx via transform: scale(); nada aqui reflui internamente.
+ */
+
+.sheet {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-ta-cream);
+  color: #16140f;
+  font-family: var(--font-document);
+}
+
+.sheet * {
+  box-sizing: border-box;
+}
+
+/* ---------- Selo discreto "ORÇAMENTO Nº" ---------- */
+.budgetBadge {
+  position: absolute;
+  top: 4mm;
+  right: 7mm;
+  z-index: 10;
+  font-size: 2.6mm;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--color-ta-gold-light);
+}
+
+/* ---------- Padrão de pontos dourados (cantos) ---------- */
+.goldDotsTopLeft,
+.goldDotsBottomRight {
+  position: absolute;
+  width: 46mm;
+  height: 46mm;
+  background-image: radial-gradient(circle, var(--color-ta-gold) 0.55px, transparent 0.55px);
+  background-size: 3.4mm 3.4mm;
+  pointer-events: none;
+  z-index: 0;
+}
+.goldDotsTopLeft {
+  top: 0;
+  left: 0;
+  -webkit-mask-image: radial-gradient(circle at 0 0, black 0%, transparent 68%);
+  mask-image: radial-gradient(circle at 0 0, black 0%, transparent 68%);
+}
+.goldDotsBottomRight {
+  bottom: 0;
+  right: 0;
+  -webkit-mask-image: radial-gradient(circle at 100% 100%, black 0%, transparent 68%);
+  mask-image: radial-gradient(circle at 100% 100%, black 0%, transparent 68%);
+}
+
+/* ---------- Cabeçalho (branco + preto, corte diagonal dourado) ---------- */
+.header {
+  position: relative;
+  flex: 0 0 72mm;
+  overflow: hidden;
+}
+
+.headerLeft {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  width: 57%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3mm;
+  padding: 8mm 6mm 8mm 10mm;
+}
+
+.logo {
+  height: 26mm;
+  width: auto;
+  max-width: 46mm;
+  object-fit: contain;
+  align-self: flex-start;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+}
+
+.brandRule {
+  flex: 1;
+  height: 1px;
+  background: #16140f;
+  opacity: 0.45;
+}
+
+.brandName {
+  font-weight: 700;
+  font-size: 4.4mm;
+  letter-spacing: 0.14em;
+  color: #16140f;
+  white-space: nowrap;
+}
+
+.brandPhone {
+  font-weight: 600;
+  font-size: 3.9mm;
+  letter-spacing: 0.06em;
+  color: #16140f;
+}
+
+.whatsappIcon {
+  width: 4.6mm;
+  height: 4.6mm;
+  color: #25d366;
+  flex-shrink: 0;
+}
+
+.headerGoldAccent {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 38%;
+  width: 15mm;
+  background: linear-gradient(135deg, var(--color-ta-gold-light), var(--color-ta-gold-dark));
+  clip-path: polygon(45% 0%, 100% 0%, 55% 100%, 0% 100%);
+  z-index: 1;
+}
+
+.headerRight {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 45%;
+  background: var(--color-ta-black);
+  clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
+  padding: 7mm 9mm 7mm 15mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3.2mm;
+  color: #fff;
+}
+
+.headerWedge {
+  position: absolute;
+  z-index: 3;
+  bottom: 0;
+  right: 0;
+  width: 10mm;
+  height: 10mm;
+  background: linear-gradient(135deg, var(--color-ta-gold-light), var(--color-ta-gold-dark));
+  clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
+}
+
+.contactRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 3mm;
+  padding-bottom: 2.4mm;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.45);
+}
+.contactRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.contactIcon {
+  flex-shrink: 0;
+  width: 5.6mm;
+  height: 5.6mm;
+  border: 1px solid var(--color-ta-gold);
+  border-radius: 1.2mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ta-gold-light);
+}
+.contactIcon svg {
+  width: 3.2mm;
+  height: 3.2mm;
+}
+
+.contactText {
+  font-size: 3.2mm;
+  line-height: 1.4;
+}
+.contactLabel {
+  font-weight: 700;
+  color: var(--color-ta-gold-light);
+}
+.contactValue {
+  color: #fff;
+}
+
+/* ---------- Bloco de dados do cliente (condicional) ---------- */
+.clientBlock {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8mm;
+  padding: 3.2mm 10mm;
+  background: #fff;
+  border-bottom: 1px solid var(--color-ta-gold);
+}
+.clientItem {
+  flex: 1;
+  min-width: 0;
+}
+.clientLabel {
+  font-size: 2.5mm;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-ta-gold-dark);
+}
+.clientValue {
+  font-size: 3.3mm;
+  margin-top: 0.6mm;
+  color: #16140f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Barra "DESCRIÇÃO MÃO DE OBRA E MATERIAL" ---------- */
+.titleBar {
+  position: relative;
+  flex: 0 0 11mm;
+  background: var(--color-ta-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.titleText {
+  color: var(--color-ta-gold-light);
+  font-weight: 700;
+  font-size: 3.7mm;
+  letter-spacing: 0.16em;
+}
+.titleSlashes {
+  position: absolute;
+  display: flex;
+  gap: 1mm;
+}
+.titleSlashesLeft {
+  left: 13mm;
+}
+.titleSlashesRight {
+  right: 17mm;
+}
+.slash {
+  width: 0.7mm;
+  height: 5.4mm;
+  background: var(--color-ta-gold);
+  transform: skewX(-20deg);
+}
+.titleWedge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 12mm;
+  background: linear-gradient(135deg, var(--color-ta-gold-light), var(--color-ta-gold-dark));
+  clip-path: polygon(60% 0%, 100% 0%, 100% 100%, 20% 100%);
+}
+
+/* ---------- Área de descrição (linhas pontilhadas + marca d'água) ---------- */
+.descriptionWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 4mm 8mm 3mm;
+  border: 0.6mm solid var(--color-ta-gold);
+  overflow: hidden;
+  background: var(--color-ta-cream);
+}
+
+.watermark {
+  position: absolute;
+  z-index: 0;
+  bottom: -8mm;
+  right: -8mm;
+  width: 85mm;
+  opacity: 0.055;
+  pointer-events: none;
+}
+
+.linesLayer {
+  position: absolute;
+  z-index: 1;
+  inset: 6mm 7mm;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 8.4mm,
+    var(--color-ta-cream-line) 8.4mm,
+    var(--color-ta-cream-line) 8.6mm
+  );
+  -webkit-mask-image: repeating-linear-gradient(to right, black 0 2mm, transparent 2mm 4mm);
+  mask-image: repeating-linear-gradient(to right, black 0 2mm, transparent 2mm 4mm);
+}
+
+.descriptionText {
+  position: relative;
+  z-index: 2;
+  margin: 6mm 7mm;
+  font-size: 3.3mm;
+  line-height: 8.6mm;
+  white-space: pre-wrap;
+  color: #26221c;
+}
+
+.descriptionPlaceholder {
+  color: #a19c92;
+  font-style: italic;
+}
+
+/* ---------- Bloco de valor total / data / observação ---------- */
+.totalsWrap {
+  flex: 0 0 auto;
+  margin: 0 8mm 5mm;
+  border: 0.6mm solid var(--color-ta-gold);
+  border-top: none;
+}
+
+.totalRow {
+  display: flex;
+  border-bottom: 0.4mm solid var(--color-ta-gold);
+}
+.totalLabelCell {
+  flex: 0 0 34%;
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+  padding: 3mm 5mm;
+  background: var(--color-ta-black);
+  color: var(--color-ta-gold-light);
+  font-weight: 700;
+  font-size: 3.3mm;
+  letter-spacing: 0.06em;
+}
+.coinBadge {
+  flex-shrink: 0;
+  width: 6.8mm;
+  height: 6.8mm;
+  border-radius: 50%;
+  border: 1px solid var(--color-ta-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coinBadge svg {
+  width: 4mm;
+  height: 4mm;
+}
+.totalValueCell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 3mm 6mm;
+  font-size: 5.2mm;
+  font-weight: 700;
+  color: #16140f;
+}
+
+.subRow {
+  display: flex;
+}
+.dateCol,
+.obsCol {
+  padding: 3.4mm 6mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4mm;
+}
+.dateCol {
+  flex: 0 0 34%;
+  border-right: 0.4mm solid var(--color-ta-gold);
+}
+.obsCol {
+  flex: 1;
+  min-width: 0;
+}
+.colHeader {
+  display: flex;
+  align-items: center;
+  gap: 2.2mm;
+  font-weight: 700;
+  font-size: 3mm;
+  letter-spacing: 0.05em;
+  color: #16140f;
+}
+.colHeader svg {
+  width: 3.8mm;
+  height: 3.8mm;
+}
+.dateValue {
+  font-size: 3.5mm;
+  font-weight: 600;
+  color: #16140f;
+}
+.validityValue {
+  font-size: 2.8mm;
+  color: var(--color-ta-gray-text);
+}
+.obsValue {
+  font-size: 2.8mm;
+  line-height: 1.45;
+  color: var(--color-ta-gray-text);
+  white-space: pre-wrap;
+}
+
+/* ---------- Rodapé (preto + dourado) ---------- */
+.footer {
+  position: relative;
+  flex: 0 0 13mm;
+  background: var(--color-ta-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.footerText {
+  color: var(--color-ta-gold-light);
+  font-weight: 700;
+  font-size: 2.9mm;
+  letter-spacing: 0.16em;
+  z-index: 1;
+}
+.footerWedge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 15mm;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-ta-gold-light), var(--color-ta-gold-dark));
+  clip-path: polygon(70% 0%, 100% 0%, 100% 100%, 30% 100%);
+}
