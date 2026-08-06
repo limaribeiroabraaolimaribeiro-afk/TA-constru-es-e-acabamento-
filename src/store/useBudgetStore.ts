@@ -1,83 +1,132 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { BudgetData, BudgetItem } from '../types/budget';
+import type { BudgetData } from '../types/budget';
 import { COMPANY } from '../constants/company';
 import { createId } from '../utils/id';
 import { todayIso } from '../utils/date';
+import {
+  readDraft,
+  writeDraft,
+  readHistory,
+  writeHistory,
+  consumeNextBudgetNumber,
+} from './budgetStorage';
 
-const STORAGE_KEY = 'ta-orcamento-draft';
-
-function createEmptyBudget(): BudgetData {
+function createEmptyBudget(budgetNumber: number): BudgetData {
   const now = new Date().toISOString();
   return {
     id: createId(),
+    budgetNumber,
     clientName: '',
-    items: [{ id: createId(), description: '' }],
-    totalValue: '',
+    clientPhone: '',
+    workAddress: '',
+    showClientData: false,
+    description: '',
+    totalValue: 0,
     date: todayIso(),
-    observation: COMPANY.defaultObservation,
+    validity: COMPANY.defaultValidityDays,
+    observation: '',
     createdAt: now,
     updatedAt: now,
   };
 }
 
-interface BudgetStore {
-  budget: BudgetData;
-  /** Substitui o orçamento inteiro (usado para sincronizar com o formulário). */
-  setBudget: (budget: BudgetData) => void;
-  /** Atualiza campos específicos sem perder o restante do estado. */
-  updateBudget: (partial: Partial<BudgetData>) => void;
-  addItem: () => void;
-  removeItem: (itemId: string) => void;
-  updateItem: (itemId: string, description: string) => void;
-  resetBudget: () => void;
+/** Carrega o rascunho salvo ou inicia um novo, consumindo um número sequencial. */
+function loadInitialDraft(): BudgetData {
+  const existing = readDraft();
+  if (existing) return existing;
+  const draft = createEmptyBudget(consumeNextBudgetNumber());
+  writeDraft(draft);
+  return draft;
 }
 
-export const useBudgetStore = create<BudgetStore>()(
-  persist(
-    (set) => ({
-      budget: createEmptyBudget(),
+interface BudgetStore {
+  draft: BudgetData;
+  history: BudgetData[];
 
-      setBudget: (budget) => set({ budget }),
+  /** Inicia um orçamento novo em branco, com um número sequencial novo. */
+  createNewBudget: () => BudgetData;
+  /** Atualiza campos do rascunho atual (usado pelo formulário a cada alteração). */
+  updateDraft: (partial: Partial<BudgetData>) => void;
+  /** Limpa o rascunho atual sem consumir um novo número sequencial. */
+  clearDraft: () => void;
+  /** Salva (cria ou atualiza) o rascunho atual no histórico de orçamentos. */
+  saveBudget: () => BudgetData;
+  /** Carrega um orçamento salvo do histórico para o rascunho, para edição. */
+  loadBudget: (id: string) => BudgetData | undefined;
+  /** Cria uma cópia de um orçamento salvo, com novo id e novo número sequencial. */
+  duplicateBudget: (id: string) => BudgetData | undefined;
+  /** Remove um orçamento do histórico. Não libera o número sequencial usado. */
+  deleteBudget: (id: string) => void;
+  /** Retorna o próximo número sequencial disponível, já reservando-o. */
+  getNextBudgetNumber: () => number;
+}
 
-      updateBudget: (partial) =>
-        set((state) => ({
-          budget: { ...state.budget, ...partial, updatedAt: new Date().toISOString() },
-        })),
+export const useBudgetStore = create<BudgetStore>((set, get) => ({
+  draft: loadInitialDraft(),
+  history: readHistory(),
 
-      addItem: () =>
-        set((state) => ({
-          budget: {
-            ...state.budget,
-            items: [...state.budget.items, { id: createId(), description: '' } satisfies BudgetItem],
-            updatedAt: new Date().toISOString(),
-          },
-        })),
+  createNewBudget: () => {
+    const draft = createEmptyBudget(consumeNextBudgetNumber());
+    writeDraft(draft);
+    set({ draft });
+    return draft;
+  },
 
-      removeItem: (itemId) =>
-        set((state) => ({
-          budget: {
-            ...state.budget,
-            items: state.budget.items.filter((item) => item.id !== itemId),
-            updatedAt: new Date().toISOString(),
-          },
-        })),
+  updateDraft: (partial) => {
+    const draft = { ...get().draft, ...partial, updatedAt: new Date().toISOString() };
+    writeDraft(draft);
+    set({ draft });
+  },
 
-      updateItem: (itemId, description) =>
-        set((state) => ({
-          budget: {
-            ...state.budget,
-            items: state.budget.items.map((item) =>
-              item.id === itemId ? { ...item, description } : item,
-            ),
-            updatedAt: new Date().toISOString(),
-          },
-        })),
+  clearDraft: () => {
+    const draft = createEmptyBudget(0);
+    writeDraft(draft);
+    set({ draft });
+  },
 
-      resetBudget: () => set({ budget: createEmptyBudget() }),
-    }),
-    {
-      name: STORAGE_KEY,
-    },
-  ),
-);
+  saveBudget: () => {
+    const saved = { ...get().draft, updatedAt: new Date().toISOString() };
+    const history = get().history;
+    const existingIndex = history.findIndex((budget) => budget.id === saved.id);
+    const nextHistory =
+      existingIndex >= 0
+        ? history.map((budget, index) => (index === existingIndex ? saved : budget))
+        : [...history, saved];
+    writeHistory(nextHistory);
+    writeDraft(saved);
+    set({ history: nextHistory, draft: saved });
+    return saved;
+  },
+
+  loadBudget: (id) => {
+    const found = get().history.find((budget) => budget.id === id);
+    if (!found) return undefined;
+    writeDraft(found);
+    set({ draft: found });
+    return found;
+  },
+
+  duplicateBudget: (id) => {
+    const source = get().history.find((budget) => budget.id === id);
+    if (!source) return undefined;
+    const now = new Date().toISOString();
+    const copy: BudgetData = {
+      ...source,
+      id: createId(),
+      budgetNumber: consumeNextBudgetNumber(),
+      createdAt: now,
+      updatedAt: now,
+    };
+    writeDraft(copy);
+    set({ draft: copy });
+    return copy;
+  },
+
+  deleteBudget: (id) => {
+    const history = get().history.filter((budget) => budget.id !== id);
+    writeHistory(history);
+    set({ history });
+  },
+
+  getNextBudgetNumber: () => consumeNextBudgetNumber(),
+}));

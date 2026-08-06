@@ -1,6 +1,6 @@
 import { Controller, type Control } from 'react-hook-form';
 import type { BudgetFormValues } from '../../utils/validation';
-import { formatCurrencyInput } from '../../utils/currency';
+import { formatCurrencyDisplay, parseCurrencyInputToNumber } from '../../utils/currency';
 import { Field } from '../ui/Field';
 import { inputClass } from '../ui/inputStyles';
 
@@ -21,8 +21,8 @@ export function TotalValueField({ control }: TotalValueFieldProps) {
               inputMode="numeric"
               className={inputClass}
               placeholder="R$ 0,00"
-              value={field.value}
-              onChange={(event) => field.onChange(formatCurrencyInput(event.target.value))}
+              value={field.value ? formatCurrencyDisplay(field.value) : ''}
+              onChange={(event) => field.onChange(parseCurrencyInputToNumber(event.target.value))}
               onBlur={field.onBlur}
             />
           </Field>

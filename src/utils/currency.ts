@@ -3,19 +3,18 @@ const BRL_FORMATTER = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 });
 
-/**
- * Formata uma sequência de dígitos digitados (ex.: "123456") como moeda
- * brasileira (ex.: "R$ 1.234,56"), tratando os dois últimos dígitos como centavos.
- * Usado para mascarar o campo "Valor Total" enquanto o usuário digita.
- */
-export function formatCurrencyInput(rawDigits: string): string {
-  const digitsOnly = rawDigits.replace(/\D/g, '');
-  if (!digitsOnly) return '';
-  const cents = Number(digitsOnly);
-  return BRL_FORMATTER.format(cents / 100);
+/** Formata um número (reais) como moeda brasileira (ex.: 1500 -> "R$ 1.500,00"). */
+export function formatCurrencyDisplay(value: number): string {
+  return BRL_FORMATTER.format(value);
 }
 
-/** Extrai apenas os dígitos de um valor já formatado, para reconstruir o estado. */
-export function extractDigits(formatted: string): string {
-  return formatted.replace(/\D/g, '');
+/**
+ * Converte a entrada digitada pelo usuário (ex.: "150000" ou "R$ 1.500,00")
+ * em um número de reais, tratando os dois últimos dígitos como centavos.
+ * Usado para mascarar o campo "Valor Total" enquanto o usuário digita.
+ */
+export function parseCurrencyInputToNumber(rawInput: string): number {
+  const digitsOnly = rawInput.replace(/\D/g, '');
+  if (!digitsOnly) return 0;
+  return Number(digitsOnly) / 100;
 }

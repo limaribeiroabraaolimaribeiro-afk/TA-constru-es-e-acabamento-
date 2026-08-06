@@ -15,7 +15,8 @@ export const COMPANY = {
   },
   email: 'porcelanatofino0510@gmail.com',
   tagline: 'DO PROJETO AO DETALHE, ENTREGAMOS QUALIDADE.',
-  defaultObservation: 'O orçamento tem 1 semana de validade a partir da data da entrega.',
+  /** Validade padrão (em dias) sugerida para um novo orçamento — campo estruturado `validity`. */
+  defaultValidityDays: 7,
   /** Caminho público do arquivo oficial da logo. Ver src/components/ui/Logo.tsx. */
   logoPath: '/logo-ta.png',
 } as const;
