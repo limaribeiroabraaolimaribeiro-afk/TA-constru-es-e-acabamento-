@@ -6,7 +6,8 @@ import styles from './BudgetSheetA4.module.css';
 export function SheetHeader() {
   return (
     <div className={styles.header}>
-      <div className={styles.headerGoldAccent} aria-hidden="true" />
+      <div className={styles.headerGoldRibbon} aria-hidden="true" />
+      <div className={styles.headerBlackPanel} aria-hidden="true" />
 
       <div className={styles.headerLeft}>
         <Logo className={styles.logo} />
@@ -19,7 +20,7 @@ export function SheetHeader() {
         </div>
       </div>
 
-      <div className={styles.headerRight}>
+      <div className={styles.headerRightContent}>
         <div className={styles.contactRow}>
           <span className={styles.contactIcon}>
             <IconPerson />

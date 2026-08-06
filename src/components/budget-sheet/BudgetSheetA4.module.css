@@ -2,6 +2,10 @@
  * Folha A4 do orçamento — tamanho físico fixo (210mm x 297mm), layout interno
  * não responsivo. Em telas pequenas, o componente inteiro é escalado por
  * A4ScaledPreview.tsx via transform: scale(); nada aqui reflui internamente.
+ *
+ * Proporções calibradas por análise de pixels da imagem de referência oficial
+ * (posição das bordas douradas, largura da faixa diagonal, altura de cada
+ * seção medidas em % da folha).
  */
 
 .sheet {
@@ -24,10 +28,10 @@
 /* ---------- Selo discreto "ORÇAMENTO Nº" ---------- */
 .budgetBadge {
   position: absolute;
-  top: 4mm;
+  top: 3.6mm;
   right: 7mm;
   z-index: 10;
-  font-size: 2.6mm;
+  font-size: 2.5mm;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--color-ta-gold-light);
@@ -57,30 +61,31 @@
   mask-image: radial-gradient(circle at 100% 100%, black 0%, transparent 68%);
 }
 
-/* ---------- Cabeçalho (branco + preto, corte diagonal dourado) ---------- */
+/* ---------- Cabeçalho (branco + preto, corte diagonal dourado em seta) ---------- */
 .header {
   position: relative;
-  flex: 0 0 72mm;
+  flex: 0 0 78mm;
   overflow: hidden;
 }
 
 .headerLeft {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   height: 100%;
-  width: 57%;
+  width: 52%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3mm;
-  padding: 8mm 6mm 8mm 10mm;
+  gap: 3.4mm;
+  padding: 8mm 4mm 8mm 6mm;
 }
 
 .logo {
-  height: 26mm;
+  height: 40mm;
   width: auto;
-  max-width: 46mm;
+  max-width: 64mm;
   object-fit: contain;
+  object-position: left center;
   align-self: flex-start;
 }
 
@@ -90,60 +95,62 @@
   gap: 3mm;
 }
 
-.brandRule {
-  flex: 1;
-  height: 1px;
-  background: #16140f;
-  opacity: 0.45;
-}
-
 .brandName {
-  font-weight: 700;
-  font-size: 4.4mm;
-  letter-spacing: 0.14em;
+  font-weight: 800;
+  font-size: 4.7mm;
+  letter-spacing: 0.13em;
   color: #16140f;
   white-space: nowrap;
 }
 
 .brandPhone {
   font-weight: 600;
-  font-size: 3.9mm;
-  letter-spacing: 0.06em;
+  font-size: 4.1mm;
+  letter-spacing: 0.05em;
   color: #16140f;
 }
 
 .whatsappIcon {
-  width: 4.6mm;
-  height: 4.6mm;
+  width: 4.8mm;
+  height: 4.8mm;
   color: #25d366;
   flex-shrink: 0;
 }
 
-.headerGoldAccent {
+/*
+ * Corte diagonal em forma de seta: a borda esquerda do painel preto avança
+ * (mais preto) no topo e na base e recua (mais creme/dourado) por volta de
+ * 65% da altura do cabeçalho, formando um vértice — não é um simples corte
+ * reto. Pontos medidos como % da largura/altura do cabeçalho.
+ */
+.headerGoldRibbon {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 38%;
-  width: 15mm;
-  background: linear-gradient(135deg, var(--color-ta-gold-light), var(--color-ta-gold-dark));
-  clip-path: polygon(45% 0%, 100% 0%, 55% 100%, 0% 100%);
+  inset: 0;
   z-index: 1;
+  background: linear-gradient(160deg, var(--color-ta-gold-light) 0%, var(--color-ta-gold) 45%, var(--color-ta-gold-dark) 100%);
+  clip-path: polygon(47% 0%, 51% 0%, 62% 65%, 55% 100%, 52% 100%, 60% 65%);
 }
 
-.headerRight {
+.headerBlackPanel {
   position: absolute;
+  inset: 0;
   z-index: 2;
+  background: var(--color-ta-black);
+  clip-path: polygon(51% 0%, 100% 0%, 100% 100%, 55% 100%, 62% 65%);
+}
+
+.headerRightContent {
+  position: absolute;
+  z-index: 3;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 45%;
-  background: var(--color-ta-black);
-  clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
-  padding: 7mm 9mm 7mm 15mm;
+  left: 65%;
+  padding: 7mm 8mm 7mm 3mm;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3.2mm;
+  gap: 3.6mm;
   color: #fff;
 }
 
@@ -162,7 +169,7 @@
   display: flex;
   align-items: flex-start;
   gap: 3mm;
-  padding-bottom: 2.4mm;
+  padding-bottom: 2.6mm;
   border-bottom: 1px solid rgba(201, 162, 39, 0.45);
 }
 .contactRow:last-child {
@@ -172,8 +179,8 @@
 
 .contactIcon {
   flex-shrink: 0;
-  width: 5.6mm;
-  height: 5.6mm;
+  width: 6mm;
+  height: 6mm;
   border: 1px solid var(--color-ta-gold);
   border-radius: 1.2mm;
   display: flex;
@@ -182,13 +189,13 @@
   color: var(--color-ta-gold-light);
 }
 .contactIcon svg {
-  width: 3.2mm;
-  height: 3.2mm;
+  width: 3.4mm;
+  height: 3.4mm;
 }
 
 .contactText {
-  font-size: 3.2mm;
-  line-height: 1.4;
+  font-size: 3.3mm;
+  line-height: 1.42;
 }
 .contactLabel {
   font-weight: 700;
@@ -203,7 +210,7 @@
   flex: 0 0 auto;
   display: flex;
   gap: 8mm;
-  padding: 3.2mm 10mm;
+  padding: 3.2mm 6mm;
   background: #fff;
   border-bottom: 1px solid var(--color-ta-gold);
 }
@@ -229,7 +236,7 @@
 /* ---------- Barra "DESCRIÇÃO MÃO DE OBRA E MATERIAL" ---------- */
 .titleBar {
   position: relative;
-  flex: 0 0 11mm;
+  flex: 0 0 10mm;
   background: var(--color-ta-black);
   display: flex;
   align-items: center;
@@ -238,9 +245,9 @@
 }
 .titleText {
   color: var(--color-ta-gold-light);
-  font-weight: 700;
-  font-size: 3.7mm;
-  letter-spacing: 0.16em;
+  font-weight: 800;
+  font-size: 3.6mm;
+  letter-spacing: 0.15em;
 }
 .titleSlashes {
   position: absolute;
@@ -254,8 +261,8 @@
   right: 17mm;
 }
 .slash {
-  width: 0.7mm;
-  height: 5.4mm;
+  width: 0.6mm;
+  height: 5mm;
   background: var(--color-ta-gold);
   transform: skewX(-20deg);
 }
@@ -274,8 +281,9 @@
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  margin: 4mm 8mm 3mm;
-  border: 0.6mm solid var(--color-ta-gold);
+  margin: 2mm 6mm 0;
+  border: 0.45mm solid var(--color-ta-gold);
+  border-bottom: none;
   overflow: hidden;
   background: var(--color-ta-cream);
 }
@@ -323,31 +331,30 @@
 /* ---------- Bloco de valor total / data / observação ---------- */
 .totalsWrap {
   flex: 0 0 auto;
-  margin: 0 8mm 5mm;
-  border: 0.6mm solid var(--color-ta-gold);
-  border-top: none;
+  margin: 0 6mm 4.5mm;
+  border: 0.45mm solid var(--color-ta-gold);
 }
 
 .totalRow {
   display: flex;
-  border-bottom: 0.4mm solid var(--color-ta-gold);
+  border-bottom: 0.35mm solid var(--color-ta-gold);
 }
 .totalLabelCell {
   flex: 0 0 34%;
   display: flex;
   align-items: center;
-  gap: 3mm;
-  padding: 3mm 5mm;
+  gap: 3.2mm;
+  padding: 4.4mm 5mm;
   background: var(--color-ta-black);
   color: var(--color-ta-gold-light);
   font-weight: 700;
-  font-size: 3.3mm;
+  font-size: 3.4mm;
   letter-spacing: 0.06em;
 }
 .coinBadge {
   flex-shrink: 0;
-  width: 6.8mm;
-  height: 6.8mm;
+  width: 7.4mm;
+  height: 7.4mm;
   border-radius: 50%;
   border: 1px solid var(--color-ta-gold);
   display: flex;
@@ -355,16 +362,16 @@
   justify-content: center;
 }
 .coinBadge svg {
-  width: 4mm;
-  height: 4mm;
+  width: 4.3mm;
+  height: 4.3mm;
 }
 .totalValueCell {
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 3mm 6mm;
-  font-size: 5.2mm;
-  font-weight: 700;
+  padding: 4.4mm 6mm;
+  font-size: 6.1mm;
+  font-weight: 800;
   color: #16140f;
 }
 
@@ -373,14 +380,14 @@
 }
 .dateCol,
 .obsCol {
-  padding: 3.4mm 6mm;
+  padding: 4.6mm 6mm;
   display: flex;
   flex-direction: column;
-  gap: 1.4mm;
+  gap: 1.8mm;
 }
 .dateCol {
   flex: 0 0 34%;
-  border-right: 0.4mm solid var(--color-ta-gold);
+  border-right: 0.35mm solid var(--color-ta-gold);
 }
 .obsCol {
   flex: 1;
@@ -391,26 +398,26 @@
   align-items: center;
   gap: 2.2mm;
   font-weight: 700;
-  font-size: 3mm;
+  font-size: 3.05mm;
   letter-spacing: 0.05em;
   color: #16140f;
 }
 .colHeader svg {
-  width: 3.8mm;
-  height: 3.8mm;
+  width: 3.9mm;
+  height: 3.9mm;
 }
 .dateValue {
-  font-size: 3.5mm;
-  font-weight: 600;
+  font-size: 3.8mm;
+  font-weight: 700;
   color: #16140f;
 }
 .validityValue {
-  font-size: 2.8mm;
+  font-size: 2.9mm;
   color: var(--color-ta-gray-text);
 }
 .obsValue {
-  font-size: 2.8mm;
-  line-height: 1.45;
+  font-size: 2.9mm;
+  line-height: 1.5;
   color: var(--color-ta-gray-text);
   white-space: pre-wrap;
 }
@@ -418,7 +425,7 @@
 /* ---------- Rodapé (preto + dourado) ---------- */
 .footer {
   position: relative;
-  flex: 0 0 13mm;
+  flex: 0 0 13.5mm;
   background: var(--color-ta-black);
   display: flex;
   align-items: center;
@@ -427,9 +434,9 @@
 }
 .footerText {
   color: var(--color-ta-gold-light);
-  font-weight: 700;
-  font-size: 2.9mm;
-  letter-spacing: 0.16em;
+  font-weight: 800;
+  font-size: 3mm;
+  letter-spacing: 0.15em;
   z-index: 1;
 }
 .footerWedge {
