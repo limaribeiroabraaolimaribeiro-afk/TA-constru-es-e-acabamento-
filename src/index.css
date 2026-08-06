@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens de tema — extraídos por análise do orçamento oficial da
+ * TA Construções e Acabamento. Reaproveitados na Etapa 2 (folha A4).
+ */
+@theme {
+  --color-ta-black: #141210;
+  --color-ta-black-soft: #1c1a17;
+  --color-ta-gold: #c9a227;
+  --color-ta-gold-light: #d4af37;
+  --color-ta-gold-dark: #a9861f;
+  --color-ta-cream: #f7f5f0;
+  --color-ta-cream-line: #b0aea8;
+  --color-ta-gray-text: #6b6b6b;
+
+  /* Fonte da folha A4 (documento) — será carregada via @font-face na Etapa 2,
+     quando os arquivos de fonte forem adicionados ao projeto. */
+  --font-document: 'Poppins', system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* Fonte da interface do app (formulário, botões) — usa a fonte do sistema. */
+  --font-app: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-app);
+  background: #eceae4;
+  color: #16140f;
+}

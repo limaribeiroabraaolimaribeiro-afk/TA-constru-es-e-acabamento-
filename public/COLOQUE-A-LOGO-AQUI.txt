@@ -1,0 +1,6 @@
+Adicione aqui o arquivo oficial da logo com o nome exato: logo-ta.png
+
+Se depois for fornecida uma versão vetorial oficial (SVG), adicione como
+logo-ta.svg e atualize o campo "logoPath" em src/constants/company.ts.
+
+Este arquivo de texto pode ser removido assim que a logo oficial for adicionada.
