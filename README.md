@@ -10,7 +10,16 @@ Sistema web para geração de orçamentos da TA Construções e Acabamento — s
 
 **Etapa 3 (concluída):** pré-visualização responsiva com zoom (pinça, roda do mouse, botões) e navegação por arraste, sem alterar o tamanho físico da folha nem seu layout interno.
 
-**Etapa 4 (pendente):** geração do PDF e compartilhamento via WhatsApp.
+**Etapa 4 (concluída):** geração de PDF (`src/components/pdf/`) — página única A4, fundo branco, alta resolução, aguarda fontes/logo antes de capturar e valida overflow antes de gerar.
+
+**Etapa 5 (pendente):** compartilhamento via WhatsApp.
+
+## Geração de PDF (`src/components/pdf/`)
+
+- `generatePdf.ts` — `generateBudgetPdf(sheetElement, fileName)`: aguarda `document.fonts.ready` e o carregamento de todas as `<img>` (logo/marca-d'água) antes de capturar; verifica overflow (`checkSheetOverflow`) e lança `PdfOverflowError` em vez de gerar um PDF cortado; captura via `html2canvas` (`scale: 3`, `backgroundColor: '#ffffff'`) e insere a imagem em um `jsPDF` de formato `a4` preenchendo exatamente 210×297mm — página única, sem distorcer (a imagem capturada já nasce com a proporção exata da folha). `html2canvas`/`jspdf` são importados dinamicamente (`import()`), carregados só quando o usuário gera o PDF, para não pesar o carregamento inicial do app no celular.
+- `checkSheetOverflow` compara a posição+altura reais do texto da descrição contra o espaço disponível na caixa (não usa o `scrollHeight` da caixa em si, porque a marca-d'água sangra intencionalmente para fora dela e infla essa medida sem representar overflow de conteúdo real) e também a altura total da folha (cobre o caso de uma observação muito longa empurrar o rodapé para fora da página).
+- `PdfExportButton.tsx` — botão "Gerar PDF" que baixa o arquivo (`orcamento-XXXX.pdf`) ou exibe um aviso (`role="alert"`) se o conteúdo ultrapassar a folha.
+- Em `App.tsx`, o PDF é sempre capturado a partir de uma instância **oculta e em tamanho real** de `BudgetSheetA4` (sem o `transform` de zoom/pan da pré-visualização), garantindo resultado idêntico ao layout aprovado independente do zoom que o usuário está vendo na tela.
 
 ## Folha A4 (`src/components/budget-sheet/`)
 

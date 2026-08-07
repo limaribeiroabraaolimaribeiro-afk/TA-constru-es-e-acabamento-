@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { BudgetForm } from './components/form/BudgetForm';
 import { Logo } from './components/ui/Logo';
 import { COMPANY } from './constants/company';
 import { useBudgetStore } from './store/useBudgetStore';
 import { A4ZoomableViewer } from './components/budget-sheet/A4ZoomableViewer';
 import { BudgetSheetA4 } from './components/budget-sheet/BudgetSheetA4';
+import { PdfExportButton } from './components/pdf/PdfExportButton';
 
 type View = 'editar' | 'visualizar';
 
@@ -17,6 +18,7 @@ type View = 'editar' | 'visualizar';
 function App() {
   const draft = useBudgetStore((state) => state.draft);
   const [view, setView] = useState<View>('editar');
+  const pdfSheetRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="mx-auto flex min-h-svh max-w-md flex-col bg-neutral-50">
@@ -49,13 +51,26 @@ function App() {
         {view === 'editar' ? (
           <BudgetForm />
         ) : (
-          <div className="bg-neutral-200 p-3">
+          <div className="flex flex-col gap-3 bg-neutral-200 p-3">
             <A4ZoomableViewer>
               <BudgetSheetA4 budget={draft} />
             </A4ZoomableViewer>
+            <PdfExportButton sheetRef={pdfSheetRef} budget={draft} />
           </div>
         )}
       </main>
+
+      {/*
+        Instância oculta em tamanho real (210mm x 297mm), sem o transform de
+        zoom/pan da pré-visualização — é a partir dela que o PDF é capturado
+        (Etapa 4), garantindo resultado idêntico ao layout aprovado
+        independente do nível de zoom que o usuário está vendo na tela.
+      */}
+      <div style={{ position: 'fixed', top: 0, left: '-10000px', pointerEvents: 'none' }} aria-hidden="true">
+        <div ref={pdfSheetRef}>
+          <BudgetSheetA4 budget={draft} />
+        </div>
+      </div>
     </div>
   );
 }
