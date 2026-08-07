@@ -51,6 +51,9 @@
 .goldDotsTopLeft {
   top: 0;
   left: 0;
+  /* Acima do fundo branco de .headerLeft (z-index 3) para continuar visível
+     na quina, como no papel timbrado oficial — ver comentário em .headerLeft. */
+  z-index: 4;
   -webkit-mask-image: radial-gradient(circle at 0 0, black 0%, transparent 68%);
   mask-image: radial-gradient(circle at 0 0, black 0%, transparent 68%);
 }
@@ -77,12 +80,28 @@
   align-items: center;
   justify-content: flex-start;
   padding: 8mm 4mm 8mm 6mm;
+  overflow: visible;
+  /*
+   * O arquivo da logo (public/logo-ta.png) não tem transparência — é um
+   * PNG opaco com fundo quase branco (#fefefe) já embutido. Sem este
+   * background aqui, a área ficava com o creme da folha (--color-ta-cream,
+   * mais amarelado) por trás, e a borda retangular da imagem aparecia como
+   * um "card" colado por cima. Branco sólido aqui funde as duas camadas.
+   */
+  background: #fff;
 }
 
 /*
  * Logo oficial (public/logo-ta.png) — já inclui o ícone, o nome da empresa
  * e o telefone/WhatsApp na própria arte. Renderizada com object-fit: contain
  * para preservar a proporção original (1536x1024) sem distorcer ou cortar.
+ *
+ * O arquivo tem uma margem branca interna desigual ao redor do desenho
+ * (maior embaixo e à esquerda). scale + translate aproxima visualmente o
+ * desenho da margem esquerda e do centro vertical do bloco, sem recortar
+ * nada — os valores foram calculados a partir da caixa real do conteúdo
+ * dentro do PNG (deixando folga de sobra em todas as bordas) e conferidos
+ * visualmente contra a referência oficial.
  */
 .logo {
   height: 60mm;
@@ -90,6 +109,8 @@
   max-width: 98mm;
   object-fit: contain;
   object-position: left center;
+  transform: scale(1.16) translate(-5%, 4%);
+  transform-origin: left center;
 }
 
 /*
