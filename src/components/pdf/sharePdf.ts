@@ -11,10 +11,19 @@ export function buildWhatsAppMessage(budget: Pick<BudgetData, 'budgetNumber' | '
 /**
  * Abre o WhatsApp (app no celular, ou web) com a mensagem pronta, sem tentar
  * anexar o PDF via URL — a Web API do WhatsApp (wa.me) não suporta isso.
+ *
+ * Navega a própria aba (`location.href`), em vez de `window.open`/
+ * `target="_blank"`: a geração do PDF antes deste ponto (html2canvas) leva
+ * alguns segundos, e por essa altura o navegador já não considera o toque
+ * original do usuário "recente" o suficiente para autorizar uma nova janela
+ * — o Chrome no Android bloqueia como pop-up. Trocar a navegação da própria
+ * aba não passa por essa checagem (não é uma nova janela/aba) e funciona
+ * com um único toque. No Android, um link wa.me é interceptado pelo próprio
+ * sistema para abrir o app do WhatsApp direto, sem tirar o usuário do PWA.
  */
 export function openWhatsAppWithMessage(message: string): void {
   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
+  window.location.href = url;
 }
 
 export type ShareResult = 'shared' | 'cancelled' | 'fallback';

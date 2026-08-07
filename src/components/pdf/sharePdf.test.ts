@@ -37,11 +37,20 @@ describe('buildWhatsAppMessage', () => {
 });
 
 describe('shareBudgetPdf', () => {
+  const originalLocation = window.location;
+
   afterEach(() => {
     vi.unstubAllGlobals();
     // @ts-expect-error -- remoção deliberada entre testes
     delete window.open;
+    Object.defineProperty(window, 'location', { value: originalLocation, writable: true });
   });
+
+  function stubLocation() {
+    const location = { href: '' };
+    Object.defineProperty(window, 'location', { value: location, writable: true });
+    return location;
+  }
 
   it('usa a Web Share API quando disponível e navigator.canShare aceita arquivos', async () => {
     const shareMock = vi.fn().mockResolvedValue(undefined);
@@ -75,7 +84,7 @@ describe('shareBudgetPdf', () => {
     expect(windowOpenMock).not.toHaveBeenCalled();
   });
 
-  it('faz fallback (baixa o PDF e abre o WhatsApp com mensagem) quando a Web Share API não está disponível', async () => {
+  it('faz fallback (baixa o PDF e navega para o WhatsApp com mensagem) quando a Web Share API não está disponível', async () => {
     const navigatorWithoutShare = { ...navigator };
     // @ts-expect-error -- simula ambiente sem suporte a compartilhamento nativo
     delete navigatorWithoutShare.share;
@@ -84,16 +93,19 @@ describe('shareBudgetPdf', () => {
     vi.stubGlobal('navigator', navigatorWithoutShare);
     const windowOpenMock = vi.fn();
     vi.stubGlobal('open', windowOpenMock);
+    const location = stubLocation();
 
     const budget = makeBudget({ budgetNumber: 5, clientName: 'João Pereira' });
     const result = await shareBudgetPdf(new Blob(['pdf']), 'orcamento.pdf', budget);
 
     expect(result).toBe('fallback');
-    expect(windowOpenMock).toHaveBeenCalledTimes(1);
-    const [url] = windowOpenMock.mock.calls[0];
-    expect(url).toContain('https://wa.me/?text=');
-    expect(decodeURIComponent(url)).toContain('João Pereira');
-    expect(decodeURIComponent(url)).toContain('nº 0005');
+    // Requisito: nunca usar window.open/target=_blank para o fallback do
+    // WhatsApp — no Android Chrome isso é bloqueado como pop-up depois do
+    // delay da geração do PDF. A navegação precisa ser na própria aba.
+    expect(windowOpenMock).not.toHaveBeenCalled();
+    expect(location.href).toContain('https://wa.me/?text=');
+    expect(decodeURIComponent(location.href)).toContain('João Pereira');
+    expect(decodeURIComponent(location.href)).toContain('nº 0005');
   });
 
   it('faz fallback quando navigator.canShare rejeita arquivos', async () => {
@@ -101,11 +113,28 @@ describe('shareBudgetPdf', () => {
     vi.stubGlobal('navigator', { ...navigator, share: shareMock, canShare: () => false });
     const windowOpenMock = vi.fn();
     vi.stubGlobal('open', windowOpenMock);
+    const location = stubLocation();
 
     const result = await shareBudgetPdf(new Blob(['pdf']), 'orcamento.pdf', makeBudget());
 
     expect(result).toBe('fallback');
     expect(shareMock).not.toHaveBeenCalled();
-    expect(windowOpenMock).toHaveBeenCalledTimes(1);
+    expect(windowOpenMock).not.toHaveBeenCalled();
+    expect(location.href).toContain('https://wa.me/?text=');
+  });
+
+  it('faz fallback sem pop-up quando navigator.share falha por perda de user activation (NotAllowedError)', async () => {
+    const notAllowedError = new DOMException('Must be handling a user gesture', 'NotAllowedError');
+    const shareMock = vi.fn().mockRejectedValue(notAllowedError);
+    vi.stubGlobal('navigator', { ...navigator, share: shareMock, canShare: () => true });
+    const windowOpenMock = vi.fn();
+    vi.stubGlobal('open', windowOpenMock);
+    const location = stubLocation();
+
+    const result = await shareBudgetPdf(new Blob(['pdf']), 'orcamento.pdf', makeBudget());
+
+    expect(result).toBe('fallback');
+    expect(windowOpenMock).not.toHaveBeenCalled();
+    expect(location.href).toContain('https://wa.me/?text=');
   });
 });
