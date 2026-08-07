@@ -6,14 +6,16 @@ Sistema web para geração de orçamentos da TA Construções e Acabamento — s
 
 **Etapa 1 (concluída):** configuração do projeto, tipos, constantes, estado (Zustand + persistência local em três chaves separadas) e formulário de preenchimento (sem lista de itens estruturada — descrição em texto livre).
 
-**Etapa 2 (concluída):** folha A4 (`src/components/budget-sheet/`) recriada em HTML/CSS fiel ao papel timbrado oficial — tamanho físico fixo (210mm × 297mm), layout interno não responsivo, escalada como um todo no celular. Tela temporária de "Editar/Visualizar" para conferência do layout.
+**Etapa 2 (concluída):** folha A4 (`src/components/budget-sheet/`) recriada em HTML/CSS fiel ao papel timbrado oficial — tamanho físico fixo (210mm × 297mm), layout interno não responsivo. Logo oficial aplicada (`public/logo-ta.png`).
 
-**Etapa 3 (pendente):** geração do PDF e compartilhamento via WhatsApp.
+**Etapa 3 (concluída):** pré-visualização responsiva com zoom (pinça, roda do mouse, botões) e navegação por arraste, sem alterar o tamanho físico da folha nem seu layout interno.
+
+**Etapa 4 (pendente):** geração do PDF e compartilhamento via WhatsApp.
 
 ## Folha A4 (`src/components/budget-sheet/`)
 
 - `BudgetSheetA4.tsx` — componente raiz, tamanho fixo 210mm × 297mm (`.sheet` em `BudgetSheetA4.module.css`), monta cabeçalho, bloco de cliente condicional, barra de título, área de descrição, bloco de totais e rodapé.
-- `A4ScaledPreview.tsx` — envolve a folha e aplica `transform: scale()` proporcional à largura disponível (via `ResizeObserver`), sem alterar o layout interno — é assim que a visualização no celular funciona (item 8 da Etapa 2).
+- `A4ZoomableViewer.tsx` — envolve a folha para a pré-visualização: escala automaticamente à largura disponível (`ResizeObserver`) e adiciona zoom (pinça de dois dedos, roda do mouse/trackpad, botões +/−/Ajustar) e navegação por arraste quando ampliado. Usa listeners nativos (`{ passive: false }`) para `wheel`/`touchmove`, já que o React anexa esses eventos como passivos por padrão e não permite `preventDefault()` neles — sem isso, o gesto de pinça acionaria o zoom nativo da página em vez do zoom do visualizador. O tamanho real da folha (210mm × 297mm) e seu layout interno nunca são alterados, apenas a escala/posição de exibição do wrapper.
 - `SheetHeader.tsx`, `SheetClientBlock.tsx`, `SheetTitleBar.tsx`, `SheetDescriptionArea.tsx`, `SheetTotalsBlock.tsx`, `SheetFooter.tsx` — seções da folha.
 - `icons.tsx` — pictogramas genéricos em SVG (pessoa, telefone, pin, envelope, calendário, documento, cifrão, WhatsApp) — não são a logo da empresa.
 - Cortes diagonais dourados, cunhas de canto e padrão de pontos são gerados via `clip-path`/`radial-gradient` em CSS puro (sem imagens).

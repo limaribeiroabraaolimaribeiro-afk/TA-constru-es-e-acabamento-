@@ -1,7 +1,7 @@
 /*
  * Folha A4 do orçamento — tamanho físico fixo (210mm x 297mm), layout interno
  * não responsivo. Em telas pequenas, o componente inteiro é escalado por
- * A4ScaledPreview.tsx via transform: scale(); nada aqui reflui internamente.
+ * A4ZoomableViewer.tsx via transform: scale(); nada aqui reflui internamente.
  *
  * Proporções calibradas por análise de pixels da imagem de referência oficial
  * (posição das bordas douradas, largura da faixa diagonal, altura de cada

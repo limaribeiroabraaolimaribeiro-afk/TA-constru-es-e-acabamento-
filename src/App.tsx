@@ -3,15 +3,16 @@ import { BudgetForm } from './components/form/BudgetForm';
 import { Logo } from './components/ui/Logo';
 import { COMPANY } from './constants/company';
 import { useBudgetStore } from './store/useBudgetStore';
-import { A4ScaledPreview } from './components/budget-sheet/A4ScaledPreview';
+import { A4ZoomableViewer } from './components/budget-sheet/A4ZoomableViewer';
 import { BudgetSheetA4 } from './components/budget-sheet/BudgetSheetA4';
 
 type View = 'editar' | 'visualizar';
 
 /**
- * Tela temporária de visualização (Etapa 2) — alterna entre o formulário e a
- * folha A4 escalada, apenas para conferência do layout antes da Etapa 3
- * (geração de PDF e compartilhamento).
+ * Tela temporária de visualização — alterna entre o formulário e a folha A4,
+ * com pré-visualização responsiva (escala automática à largura disponível)
+ * e zoom/navegação (pinça, roda do mouse, arraste, botões). O tamanho físico
+ * da folha e seu layout interno (BudgetSheetA4) não são afetados.
  */
 function App() {
   const draft = useBudgetStore((state) => state.draft);
@@ -49,9 +50,9 @@ function App() {
           <BudgetForm />
         ) : (
           <div className="bg-neutral-200 p-3">
-            <A4ScaledPreview>
+            <A4ZoomableViewer>
               <BudgetSheetA4 budget={draft} />
-            </A4ScaledPreview>
+            </A4ZoomableViewer>
           </div>
         )}
       </main>

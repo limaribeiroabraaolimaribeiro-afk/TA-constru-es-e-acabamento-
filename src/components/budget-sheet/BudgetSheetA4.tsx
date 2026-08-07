@@ -20,8 +20,8 @@ interface BudgetSheetA4Props {
 /**
  * Folha A4 do orçamento, fiel ao papel timbrado oficial da TA Construções e
  * Acabamento. Tamanho físico fixo (210mm x 297mm) e layout interno não
- * responsivo — em telas pequenas, use A4ScaledPreview para escalar o
- * componente inteiro sem alterar seu layout interno.
+ * responsivo — em telas pequenas, use A4ZoomableViewer para escalar/navegar
+ * o componente inteiro sem alterar seu layout interno.
  */
 export function BudgetSheetA4({ budget }: BudgetSheetA4Props) {
   return (
