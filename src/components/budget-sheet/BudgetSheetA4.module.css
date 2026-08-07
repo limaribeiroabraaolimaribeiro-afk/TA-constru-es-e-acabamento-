@@ -51,9 +51,9 @@
 .goldDotsTopLeft {
   top: 0;
   left: 0;
-  /* Acima do fundo branco de .headerLeft (z-index 3) para continuar visível
+  /* Acima do fundo branco de .headerLeft (z-index 1) para continuar visível
      na quina, como no papel timbrado oficial — ver comentário em .headerLeft. */
-  z-index: 4;
+  z-index: 2;
   -webkit-mask-image: radial-gradient(circle at 0 0, black 0%, transparent 68%);
   mask-image: radial-gradient(circle at 0 0, black 0%, transparent 68%);
 }
@@ -73,7 +73,14 @@
 
 .headerLeft {
   position: relative;
-  z-index: 3;
+  /*
+   * Fica abaixo do chevron/faixa dourada e do painel preto (ver z-index de
+   * .headerGoldRibbon e .headerBlackPanel logo adiante) — como a logo agora
+   * é exibida um pouco maior (ver .logo) e headerLeft tem overflow:visible,
+   * sem isso o retângulo branco da logo vazava por cima do corte diagonal
+   * dourado e cobria/cortava seu desenho.
+   */
+  z-index: 1;
   height: 100%;
   width: 52%;
   display: flex;
@@ -122,7 +129,7 @@
 .headerGoldRibbon {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
   background: linear-gradient(160deg, var(--color-ta-gold-light) 0%, var(--color-ta-gold) 45%, var(--color-ta-gold-dark) 100%);
   clip-path: polygon(47% 0%, 51% 0%, 62% 65%, 55% 100%, 52% 100%, 60% 65%);
 }
@@ -130,14 +137,14 @@
 .headerBlackPanel {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 4;
   background: var(--color-ta-black);
   clip-path: polygon(51% 0%, 100% 0%, 100% 100%, 55% 100%, 62% 65%);
 }
 
 .headerRightContent {
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   top: 0;
   right: 0;
   bottom: 0;
@@ -152,7 +159,7 @@
 
 .headerWedge {
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   bottom: 0;
   right: 0;
   width: 10mm;
