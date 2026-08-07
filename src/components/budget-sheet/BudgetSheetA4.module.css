@@ -211,6 +211,19 @@
 /* ---------- Bloco de dados do cliente (condicional) ---------- */
 .clientBlock {
   flex: 0 0 auto;
+  /*
+   * Altura explícita, medida da própria renderização natural do bloco
+   * (rótulo + valor, com o padding atual) — sem isso, a altura ficava
+   * implícita (flex-basis:auto = altura do conteúdo). O html2canvas calcula
+   * essa altura de conteúdo menor do que o navegador (confirmado: o título
+   * preto seguinte começava ~4,5mm mais cedo no canvas do que na tela), e
+   * como esse bloco é seguido diretamente pela barra preta do título, a
+   * diferença fazia a barra cobrir a base do texto (CLIENTE/TELEFONE/LOCAL
+   * DA OBRA) no PDF. Uma altura fixa elimina a dependência do cálculo de
+   * altura automática do html2canvas — mesmo número nas duas engines, sem
+   * mudar nada visualmente (é a altura que o bloco já tinha).
+   */
+  height: 15.96mm;
   display: flex;
   gap: 8mm;
   padding: 3.2mm 6mm;
@@ -229,6 +242,22 @@
 }
 .clientValue {
   font-size: 3.3mm;
+  /*
+   * line-height maior que o necessário na tela (onde "normal" já basta) —
+   * o html2canvas posiciona o texto um pouco mais para baixo dentro da
+   * própria linha do que o navegador (independente da altura do bloco pai:
+   * ver .clientBlock acima). Como este elemento tem overflow:hidden (para
+   * truncar nomes/endereços longos em uma linha só), esse deslocamento
+   * cortava a base de letras com descendentes (g, ç, p) no PDF, mesmo a
+   * tela nunca cortando nada. 1.8 dá folga suficiente para o pior caso
+   * testado sem encostar na borda de .clientBlock (medido: ~3,5mm de
+   * sobra) — 1.5 (equivalente ao "normal" da tela) e 1.65 ainda cortavam.
+   * O topo do texto não muda (cresce só a caixa, para baixo); o texto
+   * desloca uns 0,5mm a mais que antes dentro do bloco — imperceptível e
+   * a única forma confiável de dar espaço ao html2canvas sem remover o
+   * overflow:hidden (que é necessário para o truncamento).
+   */
+  line-height: 1.8;
   margin-top: 0.6mm;
   color: #16140f;
   white-space: nowrap;
