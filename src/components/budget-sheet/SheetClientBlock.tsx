@@ -10,18 +10,24 @@ export function SheetClientBlock({ budget }: SheetClientBlockProps) {
   if (!budget.showClientData) return null;
 
   return (
-    <div className={styles.clientBlock}>
+    <div className={styles.clientBlock} data-pdf-client-block="true">
       <div className={styles.clientItem}>
         <div className={styles.clientLabel}>CLIENTE</div>
-        <div className={styles.clientValue}>{budget.clientName || '—'}</div>
+        <div className={styles.clientValue} data-pdf-client-value="true">
+          {budget.clientName || '—'}
+        </div>
       </div>
       <div className={styles.clientItem}>
         <div className={styles.clientLabel}>TELEFONE</div>
-        <div className={styles.clientValue}>{budget.clientPhone || '—'}</div>
+        <div className={styles.clientValue} data-pdf-client-value="true">
+          {budget.clientPhone || '—'}
+        </div>
       </div>
       <div className={styles.clientItem}>
         <div className={styles.clientLabel}>LOCAL DA OBRA</div>
-        <div className={styles.clientValue}>{budget.workAddress || '—'}</div>
+        <div className={styles.clientValue} data-pdf-client-value="true">
+          {budget.workAddress || '—'}
+        </div>
       </div>
     </div>
   );

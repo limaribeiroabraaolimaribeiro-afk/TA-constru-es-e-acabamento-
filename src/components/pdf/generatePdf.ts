@@ -1,5 +1,6 @@
 import { A4_WIDTH_MM, A4_HEIGHT_MM } from '../../utils/a4';
 import { fixClipPathShapesForCapture } from './fixClipPathShapesForCapture';
+import { ensureClientBlockSpacingForCapture } from './ensureClientBlockSpacingForCapture';
 
 /**
  * Escala de captura do html2canvas — resolução alta para impressão/PDF nítido.
@@ -175,6 +176,7 @@ export async function generateBudgetPdf(sheetElement: HTMLElement, fileName: str
       // fixClipPathShapesForCapture.ts). A tela do app nunca é alterada.
       onclone: (_document, clonedElement) => {
         fixClipPathShapesForCapture(clonedElement);
+        ensureClientBlockSpacingForCapture(clonedElement);
       },
     });
   } finally {
