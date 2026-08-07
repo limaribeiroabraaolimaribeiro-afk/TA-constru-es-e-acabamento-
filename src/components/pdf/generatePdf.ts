@@ -1,4 +1,5 @@
 import { A4_WIDTH_MM, A4_HEIGHT_MM } from '../../utils/a4';
+import { fixClipPathShapesForCapture } from './fixClipPathShapesForCapture';
 
 /** Escala de captura do html2canvas — resolução alta para impressão/PDF nítido. */
 const CAPTURE_SCALE = 3;
@@ -160,6 +161,12 @@ export async function generateBudgetPdf(sheetElement: HTMLElement, fileName: str
       height: sheetElement.offsetHeight,
       windowWidth: sheetElement.offsetWidth,
       windowHeight: sheetElement.offsetHeight,
+      // Corrige, só na cópia usada para a captura, as formas do cabeçalho que
+      // dependem de clip-path (não suportado pelo html2canvas — ver
+      // fixClipPathShapesForCapture.ts). A tela do app nunca é alterada.
+      onclone: (_document, clonedElement) => {
+        fixClipPathShapesForCapture(clonedElement);
+      },
     });
   } finally {
     restoreImages();

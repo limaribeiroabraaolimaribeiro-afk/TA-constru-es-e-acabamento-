@@ -6,8 +6,8 @@ import styles from './BudgetSheetA4.module.css';
 export function SheetHeader() {
   return (
     <div className={styles.header}>
-      <div className={styles.headerGoldRibbon} aria-hidden="true" />
-      <div className={styles.headerBlackPanel} aria-hidden="true" />
+      <div className={styles.headerGoldRibbon} data-pdf-clip-shape="header-gold-ribbon" aria-hidden="true" />
+      <div className={styles.headerBlackPanel} data-pdf-clip-shape="header-black-panel" aria-hidden="true" />
 
       {/* A logo oficial já traz o nome da empresa, o WhatsApp e o telefone
           "assados" na própria imagem — não duplicamos esse texto em HTML. */}
@@ -66,7 +66,7 @@ export function SheetHeader() {
         </div>
       </div>
 
-      <div className={styles.headerWedge} aria-hidden="true" />
+      <div className={styles.headerWedge} data-pdf-clip-shape="header-wedge" aria-hidden="true" />
     </div>
   );
 }
