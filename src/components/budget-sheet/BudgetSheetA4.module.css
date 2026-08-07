@@ -302,34 +302,27 @@
 }
 
 /*
- * Linhas pontilhadas da área de descrição: uma imagem SVG (dash de 2mm +
- * vão de 2mm, embutida como data URI) ladrilhada via background-image, em
- * vez do combo anterior repeating-linear-gradient + mask-image, que
- * renderizava com espessura/espaçamento inconsistentes em navegadores
- * mobile (a máscara com gradiente exige antialiasing por dash a cada
- * repetição, e isso varia por engine/GPU).
+ * Linhas horizontais contínuas (sem tracejado) da área de descrição — uma
+ * folha pautada simples.
  *
- * Um <svg> "vivo" no DOM foi testado e descartado: o html2canvas trata todo
- * elemento <svg> como uma sub-imagem à parte (serializa para
- * data:image/svg+xml e desenha via drawImage), e esse caminho específico
- * mostrou um bug real — o ladrilho ia saindo de fase conforme descia a
- * página, cortando o texto nas linhas 2 em diante (confirmado inspecionando
- * o canvas bruto do html2canvas antes mesmo de virar PDF). Um
- * background-image comum não passa por esse código separado — é o mesmo
- * mecanismo já usado (e comprovadamente fiel no PDF) pelos pontos dourados
- * dos cantos e pela faixa diagonal do cabeçalho nesta mesma folha.
- *
- * A cor vem em hexadecimal literal (não var()) porque o data URI do SVG é
- * um documento isolado, sem acesso às variáveis CSS do :root.
+ * IMPORTANTE: usa um linear-gradient comum (não repeating-linear-gradient)
+ * ladrilhado via background-size/background-repeat. O html2canvas 1.4.1 (a
+ * biblioteca usada para gerar o PDF) simplesmente NÃO reconhece a função
+ * "repeating-linear-gradient" — o valor é ignorado e nenhuma linha sai no
+ * PDF, mesmo aparecendo perfeitamente no navegador (confirmado inspecionando
+ * o canvas bruto do html2canvas antes de virar PDF). Um linear-gradient sem
+ * repetição, ladrilhado por background-size, é o mesmo mecanismo já usado
+ * com fidelidade comprovada no PDF pelos pontos dourados dos cantos desta
+ * folha — cada ladrilho de 8.6mm de altura é transparente e só os últimos
+ * 0.3mm (~1px) recebem a cor cinza, formando uma linha contínua por
+ * ladrilho, repetida verticalmente.
  */
 .linesLayer {
   position: absolute;
   z-index: 1;
   inset: 6mm 7mm;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='8.6' viewBox='0 0 4 8.6'%3E%3Cline x1='0' y1='8.5' x2='2' y2='8.5' stroke='%23b0aea8' stroke-width='0.2'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 4mm 8.6mm;
-  background-position: 0 0;
+  background-image: linear-gradient(to bottom, transparent 0%, transparent 96.5%, #cfcfcf 96.5%, #cfcfcf 100%);
+  background-size: 100% 8.6mm;
 }
 
 .descriptionText {
