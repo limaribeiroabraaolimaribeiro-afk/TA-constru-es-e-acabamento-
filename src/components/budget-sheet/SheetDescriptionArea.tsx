@@ -9,7 +9,7 @@ export function SheetDescriptionArea({ description }: SheetDescriptionAreaProps)
   return (
     <div className={styles.descriptionWrap} data-testid="budget-description-wrap">
       <Logo variant="watermark" className={styles.watermark} />
-      <div className={styles.linesLayer} aria-hidden="true" />
+      <div className={styles.linesLayer} aria-hidden="true" data-testid="budget-description-lines" />
       {description.trim() ? (
         <div className={styles.descriptionText} data-testid="budget-description-text">
           {description}
