@@ -1,6 +1,6 @@
 import { Logo } from '../ui/Logo';
 import { COMPANY } from '../../constants/company';
-import { IconPerson, IconPhone, IconPin, IconEnvelope, IconWhatsapp } from './icons';
+import { IconPerson, IconPhone, IconPin, IconEnvelope } from './icons';
 import styles from './BudgetSheetA4.module.css';
 
 export function SheetHeader() {
@@ -9,15 +9,10 @@ export function SheetHeader() {
       <div className={styles.headerGoldRibbon} aria-hidden="true" />
       <div className={styles.headerBlackPanel} aria-hidden="true" />
 
+      {/* A logo oficial já traz o nome da empresa, o WhatsApp e o telefone
+          "assados" na própria imagem — não duplicamos esse texto em HTML. */}
       <div className={styles.headerLeft}>
         <Logo className={styles.logo} />
-        <div className={styles.brandRow}>
-          <span className={styles.brandName}>CONSTRUÇÕES E ACABAMENTO</span>
-        </div>
-        <div className={styles.brandRow}>
-          <IconWhatsapp className={styles.whatsappIcon} />
-          <span className={styles.brandPhone}>{COMPANY.phone}</span>
-        </div>
       </div>
 
       <div className={styles.headerRightContent}>

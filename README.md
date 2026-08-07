@@ -55,7 +55,7 @@ Três chaves separadas (`src/store/budgetStorage.ts`), em vez de um único blob 
 
 ## Logo oficial
 
-O projeto está preparado para usar o arquivo oficial da logo em `public/logo-ta.png`. Esse arquivo **ainda não foi adicionado** — adicione-o manualmente nesse caminho (ou `public/logo-ta.svg`, se uma versão vetorial oficial for fornecida futuramente; nesse caso, atualize `logoPath` em `src/constants/company.ts`). A logo **não** é recriada em código — apenas exibida como fornecida.
+`public/logo-ta.png` é o arquivo oficial fornecido pela empresa (cópia exata, sem edição/recorte/vetorização). A imagem já traz o ícone, o nome "CONSTRUÇÕES E ACABAMENTO" e o WhatsApp/telefone "assados" na própria arte — por isso `SheetHeader.tsx` não duplica esse texto em HTML, apenas exibe a logo (`object-fit: contain`, sem distorcer nem cortar). Se uma versão vetorial oficial (`public/logo-ta.svg`) for fornecida futuramente, atualize `logoPath` em `src/constants/company.ts` para apontar para ela.
 
 ## Rodando o projeto
 

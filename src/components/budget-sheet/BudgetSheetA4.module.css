@@ -74,47 +74,22 @@
   height: 100%;
   width: 52%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 3.4mm;
+  align-items: center;
+  justify-content: flex-start;
   padding: 8mm 4mm 8mm 6mm;
 }
 
+/*
+ * Logo oficial (public/logo-ta.png) — já inclui o ícone, o nome da empresa
+ * e o telefone/WhatsApp na própria arte. Renderizada com object-fit: contain
+ * para preservar a proporção original (1536x1024) sem distorcer ou cortar.
+ */
 .logo {
-  height: 40mm;
+  height: 60mm;
   width: auto;
-  max-width: 64mm;
+  max-width: 98mm;
   object-fit: contain;
   object-position: left center;
-  align-self: flex-start;
-}
-
-.brandRow {
-  display: flex;
-  align-items: center;
-  gap: 3mm;
-}
-
-.brandName {
-  font-weight: 800;
-  font-size: 4.7mm;
-  letter-spacing: 0.13em;
-  color: #16140f;
-  white-space: nowrap;
-}
-
-.brandPhone {
-  font-weight: 600;
-  font-size: 4.1mm;
-  letter-spacing: 0.05em;
-  color: #16140f;
-}
-
-.whatsappIcon {
-  width: 4.8mm;
-  height: 4.8mm;
-  color: #25d366;
-  flex-shrink: 0;
 }
 
 /*
