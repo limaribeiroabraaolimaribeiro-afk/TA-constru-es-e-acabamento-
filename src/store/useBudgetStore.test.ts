@@ -99,4 +99,48 @@ describe('useBudgetStore', () => {
     expect(useBudgetStore.getState().draft.clientName).toBe('');
     expect(localStorage.getItem('ta-budget-next-number')).toBe('2');
   });
+
+  it('editar um orçamento já salvo atualiza o mesmo registro, sem duplicar e mantendo o número', async () => {
+    const useBudgetStore = await loadStore();
+
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2026-01-01T10:00:00.000Z'));
+      useBudgetStore.getState().updateDraft({ clientName: 'Cliente Original', totalValue: 1000 });
+      const saved = useBudgetStore.getState().saveBudget();
+      expect(useBudgetStore.getState().history).toHaveLength(1);
+
+      // Simula reabrir o orçamento para edição (Histórico -> Editar).
+      vi.setSystemTime(new Date('2026-01-01T10:05:00.000Z'));
+      useBudgetStore.getState().loadBudget(saved.id);
+      useBudgetStore.getState().updateDraft({ totalValue: 2500 });
+      const resaved = useBudgetStore.getState().saveBudget();
+
+      const history = useBudgetStore.getState().history;
+      expect(history).toHaveLength(1);
+      expect(resaved.id).toBe(saved.id);
+      expect(resaved.budgetNumber).toBe(saved.budgetNumber);
+      expect(resaved.createdAt).toBe(saved.createdAt);
+      expect(history[0].totalValue).toBe(2500);
+      expect(history[0].updatedAt).not.toBe(saved.updatedAt);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('mantém rascunho, histórico e contador depois de "fechar e reabrir" (novo import do módulo sem limpar o localStorage)', async () => {
+    const useBudgetStore = await loadStore();
+    useBudgetStore.getState().updateDraft({ clientName: 'Sobrevive ao reload' });
+    useBudgetStore.getState().saveBudget();
+    useBudgetStore.getState().createNewBudget();
+
+    vi.resetModules();
+    const reloadedStore = await loadStore();
+    const state = reloadedStore.getState();
+
+    expect(state.draft.budgetNumber).toBe(2);
+    expect(state.history).toHaveLength(1);
+    expect(state.history[0].clientName).toBe('Sobrevive ao reload');
+    expect(state.getNextBudgetNumber()).toBe(3);
+  });
 });

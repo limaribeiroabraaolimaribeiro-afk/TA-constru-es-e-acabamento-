@@ -12,7 +12,19 @@ Sistema web para geração de orçamentos da TA Construções e Acabamento — s
 
 **Etapa 4 (concluída):** geração de PDF (`src/components/pdf/`) — página única A4, fundo branco, alta resolução, aguarda fontes/logo antes de capturar e valida overflow antes de gerar.
 
-**Etapa 5 (pendente):** compartilhamento via WhatsApp.
+**Etapa 5 (concluída):** histórico de orçamentos (`src/components/history/`) — busca, ordenação, abrir/editar/duplicar/excluir/gerar PDF novamente, botões "Salvar orçamento"/"Novo orçamento" e feedback visual (toast).
+
+**Etapa 6 (pendente):** compartilhamento via WhatsApp.
+
+## Histórico (`src/components/history/`)
+
+- `HistoryScreen.tsx` — busca (por nome do cliente, parcial e sem diferenciar maiúsculas/minúsculas, ou por número do orçamento) e lista ordenada do mais recentemente editado para o mais antigo (`src/utils/searchBudgets.ts`).
+- `HistoryItemCard.tsx` — número, cliente, data, valor total, última edição, e as ações abrir/editar/duplicar/gerar PDF/excluir (exclusão pede confirmação inline antes de remover).
+- "Gerar PDF" no histórico usa `regeneratePdfForBudget.tsx`, que monta uma instância temporária de `BudgetSheetA4` fora da árvore normal do app — reaproveita `generateBudgetPdf` sem depender do rascunho em edição nem alterá-lo (confirmado manualmente: editar o rascunho aberto sem salvar e gerar o PDF de outro orçamento do histórico não vaza o texto não salvo para o PDF, nem o PDF sobrescreve o rascunho em edição).
+- **Salvar/Novo orçamento** (`FormActions.tsx`, na aba Editar): "Salvar" grava o rascunho atual no histórico (mesmo `id`/`budgetNumber` se já existia — atualiza em vez de duplicar); "Novo" chama `createNewBudget` (novo número sequencial, campos limpos, dados fixos da empresa mantidos, histórico intacto).
+- **Feedback visual**: `useToastStore.ts` + `Toast.tsx` — usado para salvo/duplicado/excluído/erro (PDF do histórico também usa o toast de sucesso/erro).
+- A barra inferior (`App.tsx`) tem três abas fixas: Editar, Visualizar, Histórico.
+- `BudgetForm.tsx` sincroniza (`reset()`) sempre que o `id` do rascunho muda por fora do formulário (Novo/Abrir/Editar/Duplicar vindos do Histórico) — sem isso o react-hook-form manteria os campos antigos na tela mesmo com o rascunho já trocado no estado global.
 
 ## Geração de PDF (`src/components/pdf/`)
 

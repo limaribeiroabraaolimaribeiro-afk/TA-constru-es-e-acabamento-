@@ -13,3 +13,12 @@ export function todayIso(): string {
   const day = String(now.getDate()).padStart(2, '0');
   return `${now.getFullYear()}-${month}-${day}`;
 }
+
+/** Formata um timestamp ISO completo (ex.: updatedAt) como "dd/mm/aaaa hh:mm". */
+export function formatDateTimeBr(isoDateTime: string): string {
+  const date = new Date(isoDateTime);
+  if (Number.isNaN(date.getTime())) return '';
+  const datePart = date.toLocaleDateString('pt-BR');
+  const timePart = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return `${datePart} ${timePart}`;
+}

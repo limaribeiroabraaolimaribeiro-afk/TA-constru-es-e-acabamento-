@@ -1,5 +1,6 @@
 import { useState, type RefObject } from 'react';
 import { generateBudgetPdf, PdfOverflowError } from './generatePdf';
+import { downloadBlob } from './downloadBlob';
 import { formatBudgetNumber } from '../../utils/budgetNumber';
 import type { BudgetData } from '../../types/budget';
 
@@ -9,17 +10,6 @@ interface PdfExportButtonProps {
 }
 
 type Status = 'idle' | 'loading' | 'overflow' | 'error';
-
-function downloadBlob(blob: Blob, fileName: string): void {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
 
 export function PdfExportButton({ sheetRef, budget }: PdfExportButtonProps) {
   const [status, setStatus] = useState<Status>('idle');
