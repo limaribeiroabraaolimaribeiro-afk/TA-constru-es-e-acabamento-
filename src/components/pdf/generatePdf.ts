@@ -1,8 +1,17 @@
 import { A4_WIDTH_MM, A4_HEIGHT_MM } from '../../utils/a4';
 import { fixClipPathShapesForCapture } from './fixClipPathShapesForCapture';
 
-/** Escala de captura do html2canvas — resolução alta para impressão/PDF nítido. */
-const CAPTURE_SCALE = 3;
+/**
+ * Escala de captura do html2canvas — resolução alta para impressão/PDF nítido.
+ *
+ * Testado 3 / 4 / 5 com CPU 4x mais lenta (proxy para um Android modesto):
+ * 3 → ~8s / 0,9MB; 4 → ~13s / 1,4MB; 5 → ~19s / 1,9MB. A diferença visual de
+ * nitidez (texto pequeno, ícones, linhas finas) entre 3 e 4 é real e visível
+ * a olho nu com zoom; 5 quase dobra o tempo de geração em troca de um ganho
+ * bem mais sutil — risco alto de parecer travado em aparelhos fracos. 4 é o
+ * melhor equilíbrio entre nitidez e desempenho/memória.
+ */
+const CAPTURE_SCALE = 4;
 /** Tolerância em px para o teste de overflow, absorvendo arredondamentos de layout. */
 const OVERFLOW_TOLERANCE_PX = 2;
 
@@ -172,6 +181,11 @@ export async function generateBudgetPdf(sheetElement: HTMLElement, fileName: str
     restoreImages();
   }
 
+  // PNG (não JPEG) — sem perda. O 4º argumento do addImage ('FAST') é só o
+  // nível de compressão do FlateDecode ao reencodar o PNG dentro do PDF
+  // (mesma técnica do gzip): afeta velocidade/tamanho do arquivo, nunca a
+  // qualidade da imagem — confirmado no código-fonte do jsPDF (processPNG
+  // decodifica e reencoda os mesmos pixels, sem reamostragem nenhuma).
   const imageData = canvas.toDataURL('image/png', 1.0);
 
   const pdf = new jsPDF({
