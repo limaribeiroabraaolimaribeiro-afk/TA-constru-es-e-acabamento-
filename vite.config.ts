@@ -7,6 +7,10 @@ import { pwaManifest } from './src/pwa/manifest.ts'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages publica em https://<usuario>.github.io/<repositório>/ — o
+  // base precisa bater com o nome do repositório para todos os assets
+  // (JS, CSS, ícones, service worker) resolverem corretamente no subdiretório.
+  base: '/TA-constru-es-e-acabamento-/',
   plugins: [
     react(),
     tailwindcss(),

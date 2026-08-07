@@ -8,8 +8,10 @@ export const pwaManifest: Partial<ManifestOptions> = {
   name: 'TA Orçamentos',
   short_name: 'TA Orçamentos',
   description: 'Geração de orçamentos da TA Construções e Acabamento — funciona offline, direto do celular.',
-  start_url: '/',
-  scope: '/',
+  // start_url e scope não são fixados aqui de propósito: o vite-plugin-pwa os
+  // preenche automaticamente a partir do `base` do vite.config.ts (o
+  // subdiretório do repositório no GitHub Pages), evitando um valor "/"
+  // fixo que apontaria para fora do app publicado.
   display: 'standalone',
   background_color: '#f7f5f0',
   theme_color: '#141210',

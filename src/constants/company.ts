@@ -17,6 +17,10 @@ export const COMPANY = {
   tagline: 'DO PROJETO AO DETALHE, ENTREGAMOS QUALIDADE.',
   /** Validade padrão (em dias) sugerida para um novo orçamento — campo estruturado `validity`. */
   defaultValidityDays: 7,
-  /** Caminho público do arquivo oficial da logo. Ver src/components/ui/Logo.tsx. */
-  logoPath: '/logo-ta.png',
+  /**
+   * Caminho público do arquivo oficial da logo. Prefixado com
+   * import.meta.env.BASE_URL (em vez de um "/" fixo) para funcionar tanto na
+   * raiz quanto no subdiretório do GitHub Pages. Ver src/components/ui/Logo.tsx.
+   */
+  logoPath: `${import.meta.env.BASE_URL}logo-ta.png`,
 } as const;

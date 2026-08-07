@@ -26,8 +26,8 @@ describe('pwaManifest', () => {
     }
   });
 
-  it('tem start_url e scope definidos para a raiz do app', () => {
-    expect(pwaManifest.start_url).toBe('/');
-    expect(pwaManifest.scope).toBe('/');
+  it('não fixa start_url/scope, deixando o vite-plugin-pwa derivá-los do base configurado (necessário para funcionar em subdiretório, como no GitHub Pages)', () => {
+    expect(pwaManifest.start_url).toBeUndefined();
+    expect(pwaManifest.scope).toBeUndefined();
   });
 });
