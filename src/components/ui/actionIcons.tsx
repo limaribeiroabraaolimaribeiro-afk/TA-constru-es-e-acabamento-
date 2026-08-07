@@ -65,3 +65,24 @@ export function IconSearch(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconShare(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...baseProps} {...props}>
+      <circle cx="18" cy="5.5" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="18.5" r="2.5" />
+      <path d="M8.2 10.7 15.8 7M8.2 13.3l7.6 3.7" />
+    </svg>
+  );
+}
+
+export function IconUpload(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...baseProps} {...props}>
+      <path d="M12 20.5v-11" />
+      <path d="M7.5 13 12 8.5 16.5 13" />
+      <path d="M4.5 17.5v1.8a1.7 1.7 0 0 0 1.7 1.7h11.6a1.7 1.7 0 0 0 1.7-1.7v-1.8" />
+    </svg>
+  );
+}

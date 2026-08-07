@@ -50,7 +50,7 @@ describe('HistoryScreen', () => {
     useBudgetStore.getState().saveBudget();
 
     render(<HistoryScreen onNavigate={() => {}} />);
-    fireEvent.change(screen.getByPlaceholderText(/Buscar por cliente/), { target: { value: 'MARIA' } });
+    fireEvent.change(screen.getByPlaceholderText(/Cliente ou nº/), { target: { value: 'MARIA' } });
 
     expect(screen.getByText('Maria Souza')).toBeTruthy();
     expect(screen.queryByText('João Pereira')).toBeNull();
@@ -65,7 +65,7 @@ describe('HistoryScreen', () => {
     useBudgetStore.getState().saveBudget();
 
     render(<HistoryScreen onNavigate={() => {}} />);
-    fireEvent.change(screen.getByPlaceholderText(/Buscar por cliente/), { target: { value: '0002' } });
+    fireEvent.change(screen.getByPlaceholderText(/Cliente ou nº/), { target: { value: '0002' } });
 
     expect(screen.getByText('Cliente Dois')).toBeTruthy();
     expect(screen.queryByText('Cliente Um')).toBeNull();

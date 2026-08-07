@@ -71,6 +71,57 @@ function waitForNextPaint(): Promise<void> {
   });
 }
 
+/**
+ * Troca temporariamente o `src` de cada `<img>` já carregada por um
+ * `data:` URL com os mesmos pixels (via canvas), e devolve uma função para
+ * restaurar o `src` original depois da captura.
+ *
+ * Necessário porque o html2canvas clona o documento (num iframe) para
+ * capturá-lo, e esse clone reabre cada imagem pela rede em vez de
+ * reaproveitar a que já está carregada na página. Offline, mesmo com a
+ * imagem em cache do Service Worker (a própria tela mostra a logo
+ * normalmente), esse re-fetch do html2canvas falha com
+ * ERR_INTERNET_DISCONNECTED e a logo sai em branco no PDF. Um `data:` URL
+ * não depende de rede nenhuma, então elimina o problema por completo.
+ */
+async function inlineLoadedImagesAsDataUrls(container: HTMLElement): Promise<() => void> {
+  const images = Array.from(container.querySelectorAll('img'));
+  const restores: Array<() => void> = [];
+
+  await Promise.all(
+    images.map(async (img) => {
+      if (!img.complete || img.naturalWidth === 0 || img.src.startsWith('data:')) return;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/png');
+        const originalSrc = img.src;
+
+        await new Promise<void>((resolve) => {
+          img.addEventListener('load', () => resolve(), { once: true });
+          img.addEventListener('error', () => resolve(), { once: true });
+          img.src = dataUrl;
+        });
+
+        restores.push(() => {
+          img.src = originalSrc;
+        });
+      } catch {
+        // Não foi possível ler os pixels (ex.: imagem de outra origem sem CORS) —
+        // mantém o src original e deixa o html2canvas tentar do jeito normal.
+      }
+    }),
+  );
+
+  return () => {
+    for (const restore of restores) restore();
+  };
+}
+
 export interface GeneratePdfResult {
   blob: Blob;
   fileName: string;
@@ -97,16 +148,22 @@ export async function generateBudgetPdf(sheetElement: HTMLElement, fileName: str
     import('jspdf'),
   ]);
 
-  const canvas = await html2canvas(sheetElement, {
-    scale: CAPTURE_SCALE,
-    backgroundColor: '#ffffff',
-    useCORS: true,
-    logging: false,
-    width: sheetElement.offsetWidth,
-    height: sheetElement.offsetHeight,
-    windowWidth: sheetElement.offsetWidth,
-    windowHeight: sheetElement.offsetHeight,
-  });
+  const restoreImages = await inlineLoadedImagesAsDataUrls(sheetElement);
+  let canvas: HTMLCanvasElement;
+  try {
+    canvas = await html2canvas(sheetElement, {
+      scale: CAPTURE_SCALE,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
+      width: sheetElement.offsetWidth,
+      height: sheetElement.offsetHeight,
+      windowWidth: sheetElement.offsetWidth,
+      windowHeight: sheetElement.offsetHeight,
+    });
+  } finally {
+    restoreImages();
+  }
 
   const imageData = canvas.toDataURL('image/png', 1.0);
 

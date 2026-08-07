@@ -3,12 +3,15 @@ import type { BudgetData } from '../types/budget';
 import { COMPANY } from '../constants/company';
 import { createId } from '../utils/id';
 import { todayIso } from '../utils/date';
+import type { BackupData } from '../utils/backup';
 import {
   readDraft,
   writeDraft,
   readHistory,
   writeHistory,
   consumeNextBudgetNumber,
+  peekNextBudgetNumber,
+  writeNextBudgetNumber,
 } from './budgetStorage';
 
 function createEmptyBudget(budgetNumber: number): BudgetData {
@@ -59,6 +62,10 @@ interface BudgetStore {
   deleteBudget: (id: string) => void;
   /** Retorna o próximo número sequencial disponível, já reservando-o. */
   getNextBudgetNumber: () => number;
+  /** Monta os dados atuais (rascunho, histórico, contador) para exportar como backup. */
+  exportBackupData: () => { draft: BudgetData; history: BudgetData[]; nextBudgetNumber: number };
+  /** Substitui rascunho, histórico e contador pelos dados de um backup já validado. */
+  restoreFromBackup: (backup: BackupData) => void;
 }
 
 export const useBudgetStore = create<BudgetStore>((set, get) => ({
@@ -129,4 +136,17 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
   },
 
   getNextBudgetNumber: () => consumeNextBudgetNumber(),
+
+  exportBackupData: () => ({
+    draft: get().draft,
+    history: get().history,
+    nextBudgetNumber: peekNextBudgetNumber(),
+  }),
+
+  restoreFromBackup: (backup) => {
+    writeDraft(backup.draft);
+    writeHistory(backup.history);
+    writeNextBudgetNumber(backup.nextBudgetNumber);
+    set({ draft: backup.draft, history: backup.history });
+  },
 }));

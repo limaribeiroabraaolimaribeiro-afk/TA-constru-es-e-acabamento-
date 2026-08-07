@@ -2,11 +2,12 @@ import { useRef, useState } from 'react';
 import { BudgetForm } from './components/form/BudgetForm';
 import { Logo } from './components/ui/Logo';
 import { Toast } from './components/ui/Toast';
+import { UpdatePrompt } from './components/pwa/UpdatePrompt';
 import { COMPANY } from './constants/company';
 import { useBudgetStore } from './store/useBudgetStore';
 import { A4ZoomableViewer } from './components/budget-sheet/A4ZoomableViewer';
 import { BudgetSheetA4 } from './components/budget-sheet/BudgetSheetA4';
-import { PdfExportButton } from './components/pdf/PdfExportButton';
+import { VisualizarActions } from './components/pdf/VisualizarActions';
 import { HistoryScreen } from './components/history/HistoryScreen';
 import type { AppView } from './types/navigation';
 
@@ -28,7 +29,12 @@ function App() {
 
   return (
     <div className="mx-auto flex min-h-svh max-w-md flex-col bg-neutral-50">
-      <header className="flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3">
+      <UpdatePrompt />
+
+      <header
+        className="flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3"
+        style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+      >
         <Logo className="h-10 w-10 object-contain" />
         <div>
           <p className="text-sm font-semibold text-ta-black">{COMPANY.name}</p>
@@ -43,20 +49,23 @@ function App() {
             <A4ZoomableViewer>
               <BudgetSheetA4 budget={draft} />
             </A4ZoomableViewer>
-            <PdfExportButton sheetRef={pdfSheetRef} budget={draft} />
+            <VisualizarActions sheetRef={pdfSheetRef} budget={draft} onEdit={() => setView('editar')} />
           </div>
         )}
         {view === 'historico' && <HistoryScreen onNavigate={setView} />}
       </main>
 
-      <nav className="sticky bottom-0 flex border-t border-neutral-200 bg-white">
+      <nav
+        className="sticky bottom-0 flex border-t border-neutral-200 bg-white"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         {TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setView(tab.key)}
             className={`min-h-12 flex-1 text-sm font-semibold ${
-              view === tab.key ? 'border-t-2 border-ta-gold-dark text-ta-black' : 'text-neutral-400'
+              view === tab.key ? 'border-t-2 border-ta-gold-dark text-ta-black' : 'text-neutral-500'
             }`}
           >
             {tab.label}

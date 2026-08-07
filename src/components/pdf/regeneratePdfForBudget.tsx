@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { BudgetSheetA4 } from '../budget-sheet/BudgetSheetA4';
 import { generateBudgetPdf, type GeneratePdfResult } from './generatePdf';
-import { formatBudgetNumber } from '../../utils/budgetNumber';
+import { buildPdfFileName } from '../../utils/pdfFileName';
 import type { BudgetData } from '../../types/budget';
 
 /**
@@ -31,7 +31,7 @@ export async function regeneratePdfForBudget(budget: BudgetData): Promise<Genera
       throw new Error('Falha ao preparar a folha para geração do PDF.');
     }
 
-    const fileName = `orcamento-${formatBudgetNumber(budget.budgetNumber)}.pdf`;
+    const fileName = buildPdfFileName(budget);
     return await generateBudgetPdf(sheetElement, fileName);
   } finally {
     root.unmount();

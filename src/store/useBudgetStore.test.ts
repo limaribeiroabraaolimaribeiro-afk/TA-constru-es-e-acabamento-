@@ -143,4 +143,44 @@ describe('useBudgetStore', () => {
     expect(state.history[0].clientName).toBe('Sobrevive ao reload');
     expect(state.getNextBudgetNumber()).toBe(3);
   });
+
+  it('exportBackupData reflete o estado atual e restoreFromBackup substitui rascunho/histórico/contador', async () => {
+    const useBudgetStore = await loadStore();
+    useBudgetStore.getState().updateDraft({ clientName: 'Antes do backup' });
+    useBudgetStore.getState().saveBudget();
+
+    const exported = useBudgetStore.getState().exportBackupData();
+    expect(exported.history).toHaveLength(1);
+    expect(exported.history[0].clientName).toBe('Antes do backup');
+    expect(exported.nextBudgetNumber).toBe(2);
+
+    // Simula um backup diferente (de outro momento/aparelho) sendo restaurado.
+    const backupHistory = [
+      { ...exported.draft, id: 'backup-1', budgetNumber: 5, clientName: 'Restaurado 1' },
+      { ...exported.draft, id: 'backup-2', budgetNumber: 6, clientName: 'Restaurado 2' },
+    ];
+    const backupDraft = { ...exported.draft, id: 'backup-draft', clientName: 'Rascunho restaurado' };
+
+    useBudgetStore.getState().restoreFromBackup({
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      draft: backupDraft,
+      history: backupHistory,
+      nextBudgetNumber: 7,
+    });
+
+    const state = useBudgetStore.getState();
+    expect(state.history).toHaveLength(2);
+    expect(state.history.map((b) => b.clientName)).toEqual(['Restaurado 1', 'Restaurado 2']);
+    expect(state.draft.clientName).toBe('Rascunho restaurado');
+    expect(state.getNextBudgetNumber()).toBe(7);
+
+    // O histórico restaurado sobrevive a um novo "reload" do módulo.
+    vi.resetModules();
+    const reloadedStore = await loadStore();
+    const reloadedState = reloadedStore.getState();
+    expect(reloadedState.history).toHaveLength(2);
+    expect(reloadedState.history.map((b) => b.clientName)).toEqual(['Restaurado 1', 'Restaurado 2']);
+    expect(reloadedState.draft.clientName).toBe('Rascunho restaurado');
+  });
 });

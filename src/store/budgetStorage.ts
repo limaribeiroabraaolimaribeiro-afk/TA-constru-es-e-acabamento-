@@ -50,3 +50,8 @@ export function consumeNextBudgetNumber(): number {
   localStorage.setItem(NEXT_NUMBER_KEY, String(current + 1));
   return current;
 }
+
+/** Define o contador diretamente — usado apenas ao restaurar um backup completo. */
+export function writeNextBudgetNumber(value: number): void {
+  localStorage.setItem(NEXT_NUMBER_KEY, String(value));
+}
