@@ -60,7 +60,7 @@ export function VisualizarActions({ sheetRef, budget, onEdit }: VisualizarAction
       if (result === 'shared') {
         showToast('Orçamento compartilhado.', 'success');
       } else if (result === 'fallback') {
-        showToast('PDF baixado. Envie pelo WhatsApp que abriu.', 'success');
+        showToast('PDF baixado. No WhatsApp que abriu, anexe o arquivo baixado manualmente.', 'success');
       }
     });
 

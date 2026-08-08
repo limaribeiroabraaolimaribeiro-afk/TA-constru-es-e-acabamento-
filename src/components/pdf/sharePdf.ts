@@ -35,10 +35,31 @@ function canUseNativeFileShare(file: File): boolean {
 }
 
 /**
- * Tenta compartilhar o PDF via Web Share API (abre o menu nativo do
- * aparelho, de onde o usuário escolhe o WhatsApp). Se o compartilhamento de
- * arquivo não for suportado, baixa o PDF e abre o WhatsApp com a mensagem
- * pronta (sem anexar automaticamente — não suportado via wa.me).
+ * Compartilha o PDF do orçamento.
+ *
+ * Caminho principal: Web Share API de nível 2 (arquivo), exatamente como
+ * pedido — `navigator.canShare({ files: [file] })` valida suporte, depois
+ * `navigator.share({ files: [file], text })` abre a folha nativa de
+ * compartilhamento do Android com o PDF anexado (o usuário escolhe
+ * WhatsApp, e-mail, etc. de lá). NUNCA abrimos wa.me/api.whatsapp.com nesse
+ * caminho — esses links só preenchem texto, não anexam arquivo, então só
+ * são usados como último recurso no fallback abaixo.
+ *
+ * Sem window.open/target="_blank" em lugar nenhum deste fluxo (nem aqui,
+ * nem no fallback — ver openWhatsAppWithMessage) — no Chrome/Android isso é
+ * bloqueado como pop-up depois do delay da geração do PDF.
+ *
+ * Nota sobre "ativação transitória": tanto navigator.share() quanto
+ * window.open() só funcionam enquanto o navegador ainda considera o toque
+ * original "recente" (no Chrome, alguns segundos). Como a geração do PDF
+ * (html2canvas) acontece ANTES desta função ser chamada e pode levar vários
+ * segundos em aparelhos mais fracos, é possível — em tese, num aparelho
+ * muito lento — que essa janela já tenha expirado quando chegamos aqui, e
+ * navigator.share() rejeite com NotAllowedError mesmo com arquivo
+ * suportado. É uma restrição da plataforma (nenhuma API de JS permite
+ * "renovar" a ativação), não um bug deste código — por isso o catch abaixo
+ * trata esse erro como qualquer outra falha do compartilhamento nativo e
+ * cai no fallback, em vez de travar a UI.
  */
 export async function shareBudgetPdf(blob: Blob, fileName: string, budget: BudgetData): Promise<ShareResult> {
   const message = buildWhatsAppMessage(budget);
@@ -46,13 +67,13 @@ export async function shareBudgetPdf(blob: Blob, fileName: string, budget: Budge
 
   if (canUseNativeFileShare(file)) {
     try {
-      await navigator.share({ files: [file], title: fileName, text: message });
+      await navigator.share({ files: [file], text: message });
       return 'shared';
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return 'cancelled';
       }
-      // Outros erros do compartilhamento nativo: cai no fallback abaixo.
+      console.warn('navigator.share falhou com arquivo, caindo no fallback (baixar + WhatsApp só com texto):', error);
     }
   }
 
