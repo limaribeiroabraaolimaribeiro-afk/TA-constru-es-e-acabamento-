@@ -12,6 +12,7 @@ function makeBudget(overrides: Partial<BudgetData> = {}): BudgetData {
     clientPhone: '(47) 98888-7777',
     workAddress: 'Rua das Flores, 45',
     showClientData: false,
+    descriptionType: 'labor_material',
     description: 'Linha 1\nLinha 2',
     totalValue: 1500,
     date: '2026-08-06',
@@ -59,5 +60,28 @@ describe('BudgetSheetA4', () => {
     render(<BudgetSheetA4 budget={makeBudget({ date: '2026-08-06', validity: 15 })} />);
     expect(screen.getByText('06/08/2026')).toBeTruthy();
     expect(screen.getByText(/Validade: 15 dias/)).toBeTruthy();
+  });
+
+  it('imprime o título correspondente a cada tipo de descrição', () => {
+    render(<BudgetSheetA4 budget={makeBudget({ descriptionType: 'labor' })} />);
+    expect(screen.getByText('DESCRIÇÃO MÃO DE OBRA')).toBeTruthy();
+  });
+
+  it('imprime o título de mão de obra e material', () => {
+    render(<BudgetSheetA4 budget={makeBudget({ descriptionType: 'labor_material' })} />);
+    expect(screen.getByText('DESCRIÇÃO MÃO DE OBRA E MATERIAL')).toBeTruthy();
+  });
+
+  it('imprime o título de pagamento — etapas e entradas', () => {
+    render(<BudgetSheetA4 budget={makeBudget({ descriptionType: 'payment' })} />);
+    expect(screen.getByText('DESCRIÇÃO PAGAMENTO — ETAPAS E ENTRADAS')).toBeTruthy();
+  });
+
+  it('usa o título de mão de obra e material como fallback para orçamentos antigos sem o campo', () => {
+    const budget = makeBudget();
+    // @ts-expect-error -- simula um orçamento salvo antes deste campo existir
+    delete budget.descriptionType;
+    render(<BudgetSheetA4 budget={budget} />);
+    expect(screen.getByText('DESCRIÇÃO MÃO DE OBRA E MATERIAL')).toBeTruthy();
   });
 });

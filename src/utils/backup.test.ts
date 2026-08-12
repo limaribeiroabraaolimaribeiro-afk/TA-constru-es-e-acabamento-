@@ -11,6 +11,7 @@ function makeBudget(overrides: Partial<BudgetData> = {}): BudgetData {
     clientPhone: '',
     workAddress: '',
     showClientData: false,
+    descriptionType: 'labor_material',
     description: '',
     totalValue: 1500,
     date: '2026-08-07',
@@ -84,6 +85,23 @@ describe('parseAndValidateBackup', () => {
 
     const result = parseAndValidateBackup(JSON.stringify(wrongVersion));
     expect(result.valid).toBe(false);
+  });
+
+  it('aceita um backup exportado antes de descriptionType existir, usando "mão de obra e material" como fallback', () => {
+    const draft = makeBudget();
+    const backup = createBackup({ draft, history: [draft, makeBudget({ id: 'h2' })], nextBudgetNumber: 2 });
+    // Simula um backup salvo por uma versão anterior do app: sem o campo em lugar nenhum.
+    const legacy = JSON.parse(serializeBackup(backup));
+    delete legacy.draft.descriptionType;
+    legacy.history.forEach((item: { descriptionType?: string }) => delete item.descriptionType);
+
+    const result = parseAndValidateBackup(JSON.stringify(legacy));
+
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.data.draft.descriptionType).toBe('labor_material');
+      expect(result.data.history.every((item) => item.descriptionType === 'labor_material')).toBe(true);
+    }
   });
 });
 

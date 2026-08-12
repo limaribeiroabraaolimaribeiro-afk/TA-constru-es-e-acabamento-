@@ -1,4 +1,5 @@
 import type { BudgetData } from '../types/budget';
+import { DEFAULT_DESCRIPTION_TYPE } from '../constants/descriptionTypes';
 
 /**
  * Persistência em localStorage com chaves separadas por natureza do dado —
@@ -19,8 +20,25 @@ function safeParse<T>(raw: string | null, fallback: T): T {
   }
 }
 
+/** Forma real de um orçamento como pode estar salvo em localStorage/backup — de antes de `descriptionType` existir. */
+export type StoredBudgetData = Omit<BudgetData, 'descriptionType'> & Partial<Pick<BudgetData, 'descriptionType'>>;
+
+/**
+ * Preenche campos adicionados depois que o orçamento já podia estar salvo —
+ * hoje, só descriptionType. Sem isso, um orçamento salvo antes desse campo
+ * existir chegaria com `descriptionType: undefined`, e o título impresso
+ * cairia no fallback só "por acaso" (undefined) em vez de explicitamente.
+ * Usado tanto na leitura do localStorage (abaixo) quanto na importação de
+ * backup (utils/backup.ts) — os dois pontos onde dados antigos re-entram
+ * no app — mantendo "não quebrar orçamentos antigos" num único lugar.
+ */
+export function normalizeBudget(budget: StoredBudgetData): BudgetData {
+  return { descriptionType: DEFAULT_DESCRIPTION_TYPE, ...budget };
+}
+
 export function readDraft(): BudgetData | null {
-  return safeParse<BudgetData | null>(localStorage.getItem(DRAFT_KEY), null);
+  const draft = safeParse<StoredBudgetData | null>(localStorage.getItem(DRAFT_KEY), null);
+  return draft ? normalizeBudget(draft) : null;
 }
 
 export function writeDraft(draft: BudgetData): void {
@@ -28,7 +46,7 @@ export function writeDraft(draft: BudgetData): void {
 }
 
 export function readHistory(): BudgetData[] {
-  return safeParse<BudgetData[]>(localStorage.getItem(HISTORY_KEY), []);
+  return safeParse<StoredBudgetData[]>(localStorage.getItem(HISTORY_KEY), []).map(normalizeBudget);
 }
 
 export function writeHistory(history: BudgetData[]): void {

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { budgetSchema } from './validation';
+import { normalizeBudget, type StoredBudgetData } from '../store/budgetStorage';
 import type { BudgetData } from '../types/budget';
 
 export const BACKUP_VERSION = 1;
@@ -48,6 +49,32 @@ export type BackupValidationResult =
   | { valid: true; data: BackupData }
   | { valid: false; error: string };
 
+/**
+ * Preenche descriptionType em draft/history ANTES da validação, para
+ * aceitar backups exportados antes desse campo existir — mesma
+ * normalização usada na leitura do localStorage (ver budgetStorage.ts).
+ * Feito no JSON bruto, antes do zod: o schema exige descriptionType
+ * (necessário para o zodResolver do formulário bater tipos), então um
+ * backup antigo sem o campo falharia a validação se não fosse preenchido
+ * aqui primeiro.
+ */
+function normalizeBackupJson(parsedJson: unknown): unknown {
+  if (typeof parsedJson !== 'object' || parsedJson === null) return parsedJson;
+  const obj = parsedJson as Record<string, unknown>;
+  const normalized: Record<string, unknown> = { ...obj };
+
+  if (obj.draft && typeof obj.draft === 'object') {
+    normalized.draft = normalizeBudget(obj.draft as StoredBudgetData);
+  }
+  if (Array.isArray(obj.history)) {
+    normalized.history = obj.history.map((item) =>
+      item && typeof item === 'object' ? normalizeBudget(item as StoredBudgetData) : item,
+    );
+  }
+
+  return normalized;
+}
+
 /** Valida a estrutura de um backup antes de permitir a importação (nunca sobrescreve sem essa checagem). */
 export function parseAndValidateBackup(raw: string): BackupValidationResult {
   let parsedJson: unknown;
@@ -57,7 +84,7 @@ export function parseAndValidateBackup(raw: string): BackupValidationResult {
     return { valid: false, error: 'O arquivo não é um JSON válido.' };
   }
 
-  const result = backupSchema.safeParse(parsedJson);
+  const result = backupSchema.safeParse(normalizeBackupJson(parsedJson));
   if (!result.success) {
     return { valid: false, error: 'O arquivo não tem o formato esperado de um backup do TA Orçamentos.' };
   }

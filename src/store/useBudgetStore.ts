@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { BudgetData } from '../types/budget';
 import { COMPANY } from '../constants/company';
+import { DEFAULT_DESCRIPTION_TYPE } from '../constants/descriptionTypes';
 import { createId } from '../utils/id';
 import { todayIso } from '../utils/date';
 import type { BackupData } from '../utils/backup';
@@ -23,6 +24,7 @@ function createEmptyBudget(budgetNumber: number): BudgetData {
     clientPhone: '',
     workAddress: '',
     showClientData: false,
+    descriptionType: DEFAULT_DESCRIPTION_TYPE,
     description: '',
     totalValue: 0,
     date: todayIso(),

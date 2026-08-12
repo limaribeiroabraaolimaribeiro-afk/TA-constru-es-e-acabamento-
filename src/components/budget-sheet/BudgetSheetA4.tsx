@@ -33,7 +33,7 @@ export function BudgetSheetA4({ budget }: BudgetSheetA4Props) {
 
       <SheetHeader />
       <SheetClientBlock budget={budget} />
-      <SheetTitleBar />
+      <SheetTitleBar descriptionType={budget.descriptionType} />
       <SheetDescriptionArea description={budget.description} />
       <SheetTotalsBlock budget={budget} />
       <SheetFooter />

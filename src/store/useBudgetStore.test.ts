@@ -23,6 +23,34 @@ describe('useBudgetStore', () => {
     expect(draft.totalValue).toBe(0);
   });
 
+  it('normaliza descriptionType ausente (orçamento salvo antes desse campo existir) para "labor_material"', async () => {
+    const legacyDraft = {
+      id: 'legacy-draft',
+      budgetNumber: 1,
+      clientName: 'Cliente Antigo',
+      clientPhone: '',
+      workAddress: '',
+      showClientData: false,
+      description: 'Texto já escrito antes da atualização',
+      totalValue: 0,
+      date: '2026-01-01',
+      validity: 7,
+      observation: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      // sem descriptionType — formato salvo antes deste campo existir
+    };
+    localStorage.setItem('ta-budget-draft', JSON.stringify(legacyDraft));
+    localStorage.setItem('ta-budget-history', JSON.stringify([legacyDraft]));
+
+    const useBudgetStore = await loadStore();
+    const state = useBudgetStore.getState();
+
+    expect(state.draft.descriptionType).toBe('labor_material');
+    expect(state.draft.description).toBe('Texto já escrito antes da atualização');
+    expect(state.history[0].descriptionType).toBe('labor_material');
+  });
+
   it('createNewBudget emite números sequenciais crescentes', async () => {
     const useBudgetStore = await loadStore();
     const second = useBudgetStore.getState().createNewBudget();

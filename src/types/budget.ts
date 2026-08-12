@@ -1,3 +1,11 @@
+/**
+ * Qual das três variações de descrição o orçamento usa — controla o título
+ * impresso na barra preta acima do texto livre. "labor_material" é o
+ * padrão histórico, usado como fallback para orçamentos salvos antes deste
+ * campo existir (ver normalizeBudget em store/budgetStorage.ts).
+ */
+export type DescriptionType = 'labor' | 'labor_material' | 'payment';
+
 /** Dados completos de um orçamento, incluindo numeração sequencial e controle de exibição do cliente. */
 export interface BudgetData {
   id: string;
@@ -7,7 +15,9 @@ export interface BudgetData {
   workAddress: string;
   /** Controla se o bloco de dados do cliente é impresso na folha (Etapa 2). */
   showClientData: boolean;
-  /** Texto livre, múltiplas linhas/parágrafos — descrição de mão de obra e material. */
+  /** Qual título/variação de descrição usar — ver DescriptionType. */
+  descriptionType: DescriptionType;
+  /** Texto livre, múltiplas linhas/parágrafos — conteúdo da descrição, qualquer que seja o tipo. */
   description: string;
   totalValue: number;
   /** Data no formato ISO (yyyy-mm-dd), exibida na folha como dd/mm/aaaa. */

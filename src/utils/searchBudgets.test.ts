@@ -11,6 +11,7 @@ function makeBudget(overrides: Partial<BudgetData> = {}): BudgetData {
     clientPhone: '',
     workAddress: '',
     showClientData: false,
+    descriptionType: 'labor_material',
     description: '',
     totalValue: 0,
     date: '2026-08-06',
