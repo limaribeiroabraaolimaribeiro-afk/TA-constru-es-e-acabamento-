@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { BudgetForm } from './components/form/BudgetForm';
 import { Logo } from './components/ui/Logo';
 import { Toast } from './components/ui/Toast';
-import { UpdatePrompt } from './components/pwa/UpdatePrompt';
 import { COMPANY } from './constants/company';
 import { useBudgetStore } from './store/useBudgetStore';
 import { A4ZoomableViewer } from './components/budget-sheet/A4ZoomableViewer';
@@ -44,8 +43,6 @@ function AppContent() {
 
   return (
     <div className="mx-auto flex min-h-svh max-w-md flex-col bg-neutral-50">
-      <UpdatePrompt />
-
       <header
         className="flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3"
         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}

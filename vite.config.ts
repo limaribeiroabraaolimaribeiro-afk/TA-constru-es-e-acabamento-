@@ -15,10 +15,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      // 'prompt': o novo service worker fica esperando até o usuário tocar em
-      // "Atualizar" (src/components/pwa/UpdatePrompt.tsx) — nunca atualiza
-      // sozinho enquanto a pessoa está preenchendo um orçamento.
-      registerType: 'prompt',
+      // 'autoUpdate': assim que um novo service worker termina de instalar,
+      // ele assume o controle sozinho (skipWaiting/clientsClaim, habilitados
+      // automaticamente pelo plugin para este modo) e a página recarrega —
+      // sem depender do usuário tocar em "Atualizar". Necessário para que
+      // mudanças como SYSTEM_BLOCKED cheguem a aparelhos com uma versão
+      // antiga em cache sem intervenção manual.
+      registerType: 'autoUpdate',
       includeAssets: ['favicon-32.png', 'favicon-48.png', 'apple-touch-icon.png', 'logo-ta.png'],
       manifest: pwaManifest,
       workbox: {
