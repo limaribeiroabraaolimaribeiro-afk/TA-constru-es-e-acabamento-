@@ -9,6 +9,8 @@ import { A4ZoomableViewer } from './components/budget-sheet/A4ZoomableViewer';
 import { BudgetSheetA4 } from './components/budget-sheet/BudgetSheetA4';
 import { VisualizarActions } from './components/pdf/VisualizarActions';
 import { HistoryScreen } from './components/history/HistoryScreen';
+import { SystemLockScreen } from './components/lock/SystemLockScreen';
+import { SYSTEM_BLOCKED } from './constants/systemLock';
 import type { AppView } from './types/navigation';
 
 const TABS: { key: AppView; label: string }[] = [
@@ -18,11 +20,24 @@ const TABS: { key: AppView; label: string }[] = [
 ];
 
 /**
+ * Ponto único de bloqueio (ver src/constants/systemLock.ts): quando
+ * SYSTEM_BLOCKED está ativo, nenhuma tela/hook operacional é montada —
+ * só <SystemLockScreen />. Dados em localStorage não são tocados.
+ */
+function App() {
+  if (SYSTEM_BLOCKED) {
+    return <SystemLockScreen />;
+  }
+
+  return <AppContent />;
+}
+
+/**
  * Alterna entre formulário, pré-visualização da folha A4 (com zoom/navegação)
  * e o histórico de orçamentos salvos, através de uma barra de abas fixa no
  * rodapé — padrão de navegação mobile.
  */
-function App() {
+function AppContent() {
   const draft = useBudgetStore((state) => state.draft);
   const [view, setView] = useState<AppView>('editar');
   const pdfSheetRef = useRef<HTMLDivElement>(null);
