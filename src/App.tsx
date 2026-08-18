@@ -10,6 +10,7 @@ import { VisualizarActions } from './components/pdf/VisualizarActions';
 import { HistoryScreen } from './components/history/HistoryScreen';
 import { SystemLockScreen } from './components/lock/SystemLockScreen';
 import { SYSTEM_BLOCKED } from './constants/systemLock';
+import { PaymentNoticeBanner } from './components/notice/PaymentNoticeBanner';
 import type { AppView } from './types/navigation';
 
 const TABS: { key: AppView; label: string }[] = [
@@ -53,6 +54,8 @@ function AppContent() {
           <p className="text-xs text-neutral-500">Orçamento Nº {draft.budgetNumber}</p>
         </div>
       </header>
+
+      <PaymentNoticeBanner />
 
       <main className="flex-1">
         {view === 'editar' && <BudgetForm />}

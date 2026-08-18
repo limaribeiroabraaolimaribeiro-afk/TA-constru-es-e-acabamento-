@@ -11,7 +11,7 @@
  * intactos independente deste valor — é apenas um bloqueio de interface,
  * verificado em um único lugar (src/App.tsx).
  */
-export const SYSTEM_BLOCKED = true;
+export const SYSTEM_BLOCKED = false;
 
 export const SYSTEM_LOCK_INFO = {
   pendingAmountLabel: 'R$ 175,00',
