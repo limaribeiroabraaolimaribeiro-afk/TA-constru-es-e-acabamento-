@@ -19,8 +19,8 @@ export default defineConfig({
       // ele assume o controle sozinho (skipWaiting/clientsClaim, habilitados
       // automaticamente pelo plugin para este modo) e a página recarrega —
       // sem depender do usuário tocar em "Atualizar". Necessário para que
-      // mudanças como SYSTEM_BLOCKED cheguem a aparelhos com uma versão
-      // antiga em cache sem intervenção manual.
+      // mudanças cheguem a aparelhos com uma versão antiga em cache sem
+      // intervenção manual.
       registerType: 'autoUpdate',
       includeAssets: ['favicon-32.png', 'favicon-48.png', 'apple-touch-icon.png', 'logo-ta.png'],
       manifest: pwaManifest,
