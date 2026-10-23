@@ -1,6 +1,7 @@
 import { A4_WIDTH_MM, A4_HEIGHT_MM } from '../../utils/a4';
 import { fixClipPathShapesForCapture } from './fixClipPathShapesForCapture';
 import { ensureClientBlockSpacingForCapture } from './ensureClientBlockSpacingForCapture';
+import { restoreDocumentStylesForCapture } from './restoreDocumentStylesForCapture';
 
 /**
  * Escala de captura do html2canvas — resolução alta para impressão/PDF nítido.
@@ -55,6 +56,31 @@ export function checkSheetOverflow(sheetElement: HTMLElement): boolean {
 async function waitForFonts(): Promise<void> {
   if (typeof document !== 'undefined' && 'fonts' in document) {
     await document.fonts.ready;
+  }
+}
+
+/**
+ * A tela de pré-visualização usa um wrapper e o rascunho oculto usa outro.
+ * A captura deve sempre ocorrer no elemento de dimensões A4, nunca no wrapper.
+ */
+export function findBudgetSheet(element: HTMLElement): HTMLElement {
+  const selector = '[data-testid="budget-sheet-a4"]';
+  const sheet = element.matches(selector) ? element : element.querySelector<HTMLElement>(selector);
+  if (!sheet) throw new Error('A folha A4 do orçamento não foi encontrada.');
+  return sheet;
+}
+
+/**
+ * Nos PDFs gerados a partir de uma folha posicionada fora da tela, a cópia
+ * do DOM precisa ser trazida para a origem antes da rasterização.
+ * Somente os ancestrais CLONADOS são alterados.
+ */
+function positionCloneForCapture(sheet: HTMLElement): void {
+  for (let parent = sheet.parentElement; parent; parent = parent.parentElement) {
+    if (parent.style.position === 'fixed' && parseFloat(parent.style.left) < -1000) {
+      parent.style.left = '0px';
+      parent.style.top = '0px';
+    }
   }
 }
 
@@ -144,11 +170,12 @@ export interface GeneratePdfResult {
  * conteúdo ultrapassar a folha, sem gerar um PDF cortado/distorcido.
  */
 export async function generateBudgetPdf(sheetElement: HTMLElement, fileName: string): Promise<GeneratePdfResult> {
+  const printableSheet = findBudgetSheet(sheetElement);
   await waitForFonts();
-  await waitForImages(sheetElement);
+  await waitForImages(printableSheet);
   await waitForNextPaint();
 
-  if (checkSheetOverflow(sheetElement)) {
+  if (checkSheetOverflow(printableSheet)) {
     throw new PdfOverflowError();
   }
 
@@ -159,22 +186,37 @@ export async function generateBudgetPdf(sheetElement: HTMLElement, fileName: str
     import('jspdf'),
   ]);
 
-  const restoreImages = await inlineLoadedImagesAsDataUrls(sheetElement);
+  // Guarda as regras CSSOM do documento ORIGINAL. Em um PWA/offline, os
+  // <link rel="stylesheet"> clonados pelo html2canvas podem falhar ao
+  // carregar, deixando a logo em tamanho nativo e todos os blocos sem estilo.
+  // Copiamos o CSS já carregado para que o iframe de captura não dependa da rede.
+  const sourceStyles = restoreDocumentStylesForCapture.snapshot(printableSheet.ownerDocument);
+  const restoreImages = await inlineLoadedImagesAsDataUrls(printableSheet);
   let canvas: HTMLCanvasElement;
   try {
-    canvas = await html2canvas(sheetElement, {
+    canvas = await html2canvas(printableSheet, {
       scale: CAPTURE_SCALE,
       backgroundColor: '#ffffff',
       useCORS: true,
       logging: false,
-      width: sheetElement.offsetWidth,
-      height: sheetElement.offsetHeight,
-      windowWidth: sheetElement.offsetWidth,
-      windowHeight: sheetElement.offsetHeight,
+      width: printableSheet.offsetWidth,
+      height: printableSheet.offsetHeight,
+      windowWidth: printableSheet.offsetWidth,
+      windowHeight: printableSheet.offsetHeight,
       // Corrige, só na cópia usada para a captura, as formas do cabeçalho que
       // dependem de clip-path (não suportado pelo html2canvas — ver
       // fixClipPathShapesForCapture.ts). A tela do app nunca é alterada.
-      onclone: (_document, clonedElement) => {
+      onclone: (clonedDocument, clonedElement) => {
+        restoreDocumentStylesForCapture.inject(clonedDocument, sourceStyles);
+        positionCloneForCapture(clonedElement);
+
+        // Se até mesmo após restaurar as regras a folha não tiver seu CSS,
+        // não produzir um PDF incorreto com elementos gigantes/deslocados.
+        const computed = clonedDocument.defaultView?.getComputedStyle(clonedElement);
+        if (computed?.display !== 'flex' || computed.flexDirection !== 'column') {
+          throw new Error('A folha A4 perdeu seus estilos na captura do PDF.');
+        }
+
         fixClipPathShapesForCapture(clonedElement);
         ensureClientBlockSpacingForCapture(clonedElement);
       },
